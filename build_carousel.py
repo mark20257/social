@@ -288,13 +288,14 @@ def _load_logo():
     vx, vy, vw, vh = map(float, vb)
     inner = re.sub(r"^.*?<svg[^>]*>", "", src, flags=re.S)
     inner = re.sub(r"</svg>\s*$", "", inner.strip(), flags=re.S)
+    inner = re.sub(r"<title>.*?</title>", "", inner, flags=re.S)
     _logo_cache["logo"] = (vx, vy, vw, vh, inner)
     return _logo_cache["logo"]
 
 
 def logo_ratio():
     lg = _load_logo()
-    return (lg[2] / lg[3]) if lg else 4546 / 7658
+    return (lg[2] / lg[3]) if lg else 2408.65 / 1371
 
 
 def svg_logo(x, y, height, sid, anchor="start"):
@@ -637,7 +638,7 @@ def _slide(sid, content):
 
 def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo=None):
     """Cover: illustrazione piena pagina, gradiente dal basso, testi in basso a sinistra, logo centrato."""
-    logo_h = 150
+    logo_h = 170
     logo_y = H - 56 - logo_h
     # testo impilato dal basso verso l'alto sopra il logo
     sub_size, title_size = 38, 64
@@ -889,7 +890,7 @@ def build_layout_grid(sid, n_tot, idx, eyebrow_txt, lead, question, cards, closi
     return _slide(sid, out)
 
 
-def build_layout_cta(sid, lead, headline, body, question, contacts, illu_fn, logo_h=150):
+def build_layout_cta(sid, lead, headline, body, question, contacts, illu_fn, logo_h=175):
     """CTA: logo grande in alto, headline, corpo, domanda con illustrazione, contatti."""
     out = background(sid, glow=(540, 260))
     out += svg_logo_center(sid, 64, logo_h)

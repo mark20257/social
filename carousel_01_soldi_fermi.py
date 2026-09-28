@@ -87,7 +87,7 @@ slides.append(build_layout_statement(
            ("100+", "giurisdizioni nel mondo"),
            ("3", "temi: truffe, inganni digitali e resilienza")],
     source="Fonte: IOSCO, comunicato stampa del 22 luglio 2026; worldinvestorweek.org.",
-    illu_fn=lambda sid: illu_globe(sid, 790, 330, 160),
+    illu_fn=lambda sid: illu_globe(sid, 800, 372, 146),
 ))
 
 # 05 · CHART: quanto potrò acquistare -----------------------------------------
