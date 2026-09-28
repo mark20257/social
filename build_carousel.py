@@ -1399,6 +1399,147 @@ def blk_timeline(events, step=120):
     return h, draw
 
 
+def _bubble_path(x, y, w, h, r, side):
+    """Fumetto con codina in basso (a sinistra o a destra)."""
+    t = 26
+    if side == "left":
+        return (f'M{x + r} {y} L{x + w - r} {y} Q{x + w} {y} {x + w} {y + r} L{x + w} {y + h - r} '
+                f'Q{x + w} {y + h} {x + w - r} {y + h} L{x + 34} {y + h} L{x} {y + h + t} L{x + 10} {y + h - 6} '
+                f'Q{x} {y + h - 16} {x} {y + h - r} L{x} {y + r} Q{x} {y} {x + r} {y} Z')
+    return (f'M{x + r} {y} L{x + w - r} {y} Q{x + w} {y} {x + w} {y + r} L{x + w} {y + h - r} '
+            f'Q{x + w} {y + h - 16} {x + w - 10} {y + h - 6} L{x + w} {y + h + t} L{x + w - 34} {y + h} '
+            f'L{x + r} {y + h} Q{x} {y + h} {x} {y + h - r} L{x} {y + r} Q{x} {y} {x + r} {y} Z')
+
+
+def blk_chat(messages, size=38, max_w=640, gap=40):
+    """
+    Conversazione a fumetti. messages: lista di (lato, etichetta, testo)
+    lato 'left' = cliente (fumetto chiaro), 'right' = agenzia (fumetto azzurro).
+    """
+    pad_x, pad_y = 34, 30
+    av = 44                                    # raggio avatar
+    items = []
+    for side, label, txt in messages:
+        lines = wrap(txt, size, max_w - 2 * pad_x, 700)
+        tw = max(_line_width(l, size, False) for l in lines)
+        bh = pad_y * 2 + size * 0.72 + (len(lines) - 1) * size * 1.22 + 8
+        bw = tw + 2 * pad_x
+        items.append((side, label, txt, bw, bh))
+    lab_h = 30 * 0.72 + 14
+    h = sum(lab_h + bh + 26 for *_, bh in items) + gap * (len(items) - 1)
+
+    def draw(sid, i, y):
+        g = ""
+        cy = y
+        for k, (side, label, txt, bw, bh) in enumerate(items):
+            if side == "left":
+                ax = M + av
+                bx = ax + av + 22
+                fill, tcol, lcol = SOFT, NAVY_DEEP, SOFT
+                g += svg_text(bx, cy + 30 * 0.72, label, 30, 700, DIM, spacing=2)
+            else:
+                ax = W - M - av
+                bx = ax - av - 22 - bw
+                fill, tcol, lcol = AZURE, WHITE, AZURE
+                g += svg_text(bx + bw, cy + 30 * 0.72, label, 30, 700, AZURE_LIGHT, "end", spacing=2)
+            by = cy + lab_h
+            g += f'<path d="{_bubble_path(bx, by, bw, bh, 26, side)}" fill="{fill}"/>'
+            tb, _, _ = text_block(bx + pad_x, by + pad_y + size * 0.72 + 4, txt, size, 700, tcol,
+                                  bw - 2 * pad_x + 2, 1.22, tid=f"{sid}-fumetto-{k + 1}")
+            g += tb
+            acy = by + bh + 26 - av
+            if side == "left":
+                g += circle(ax, acy, av, NAVY_MID) + icon_person(ax - 24, acy - 26, 48, SOFT)
+            else:
+                g += circle(ax, acy, av, NAVY_MID) + icon_shield(ax - 25, acy - 25, 50, AZURE, NAVY_MID)
+            cy = by + bh + 26 + gap
+        return group(g, gid=f"{sid}-chat")
+    return h, draw
+
+
+def blk_compare(banner, left, right, col_h=470):
+    """Due profili a confronto sotto un'etichetta comune (es. stesso stipendio)."""
+    bh = 64
+    h = bh + 40 + col_h
+
+    def draw(sid, i, y):
+        gap = 26
+        cw = (CW - gap) / 2
+        bw = text_width(banner, 30, 700, spacing=3) + 60
+        g = rect(W / 2 - bw / 2, y, bw, bh, AZURE, bh / 2)
+        g += svg_text(W / 2, y + bh / 2 + 11, banner, 30, 700, WHITE, "middle", spacing=3)
+        # staffa che collega il banner alle due colonne
+        g += (f'<path d="M{M + cw / 2:.1f} {y + bh + 40} L{M + cw / 2:.1f} {y + bh + 18} L{W - M - cw / 2:.1f} {y + bh + 18} '
+              f'L{W - M - cw / 2:.1f} {y + bh + 40} M{W / 2} {y + bh} L{W / 2} {y + bh + 18}" fill="none" '
+              f'stroke="{AZURE}" stroke-width="4"/>')
+        top = y + bh + 40
+        for k, col in enumerate((left, right)):
+            cx = M + k * (cw + gap)
+            g += rect(cx, top, cw, col_h, NAVY_MID, 26)
+            g += circle(cx + 76, top + 86, 50, AZURE)
+            g += col["icon"](cx + 76 - 30, top + 86 - 30, 60, WHITE, AZURE)
+            tb, _, _ = text_block(cx + 36, top + 186, col["who"], 36, 700, WHITE, cw - 64, 1.18,
+                                  tid=f"{sid}-profilo-{k + 1}")
+            g += tb
+            ph = block_height(col["need"], 36, 700, cw - 64, 1.18)
+            p_top = top + col_h - 40 - ph
+            g += svg_text(cx + 36, p_top - 22, "PRIORITÀ", 30, 700, AZURE_LIGHT, spacing=2)
+            g += rect(cx + 36, p_top - 80, cw - 72, 3, NAVY_LINE)
+            pb, _, _ = text_block(cx + 36, p_top + 36 * 0.72, col["need"], 36, 700, WHITE, cw - 64, 1.18,
+                                  tid=f"{sid}-priorita-{k + 1}")
+            g += pb
+        return group(g, gid=f"{sid}-confronto")
+    return h, draw
+
+
+def blk_plan(title, items, row_h=108):
+    """Foglio stilizzato 'il tuo piano' con priorita' numerate."""
+    head = 80
+    h = head + 30 + len(items) * row_h + 24
+
+    def draw(sid, i, y):
+        dx, dw = M + 40, CW - 80
+        d = rect(dx + 16, y + 16, dw, h, NAVY_DEEP, 22, extra=' opacity="0.6"')
+        d += rect(dx, y, dw, h, SOFT, 22) + rect(dx, y, dw, head, NAVY, 22) + rect(dx, y + head - 30, dw, 30, NAVY)
+        d += svg_text(dx + 36, y + head / 2 + 11, title, 30, 700, WHITE, spacing=3)
+        for k, lab in enumerate(items):
+            ry = y + head + 30 + k * row_h
+            cy = ry + row_h / 2
+            d += circle(dx + 66, cy, 30, AZURE) + svg_text(dx + 66, cy + 12, str(k + 1), 34, 700, WHITE, "middle")
+            d += svg_text(dx + 116, cy - 4, lab, 36, 700, NAVY_DEEP, tid=f"{sid}-piano-{k + 1}")
+            lw = text_width(lab, 36, 700)
+            d += rect(dx + 116, cy + 18, min(dw - 160, lw + 120), 8, DIM, 4)
+            d += rect(dx + 116 + lw + 30, cy - 18, max(40, dw - 160 - lw - 30), 8, DIM, 4)
+        return group(d, gid=f"{sid}-piano")
+    return h, draw
+
+
+def blk_docillu(label="DIP", h=420):
+    """Illustrazione di un documento informativo con lente d'ingrandimento."""
+    def draw(sid, i, y):
+        w = 320
+        x = W / 2 - w / 2 - 40
+        g = rect(x + 70, y + 20, w, h - 40, NAVY_LINE, 22)                       # foglio dietro
+        g += rect(x + 16, y + 26, w, h - 40, NAVY_DEEP, 22, extra=' opacity="0.6"')
+        g += rect(x, y + 10, w, h - 40, SOFT, 22)
+        g += rect(x, y + 10, w, 96, AZURE, 22) + rect(x, y + 70, w, 36, AZURE)
+        g += svg_text(x + w / 2, y + 78, label, 56, 700, WHITE, "middle", spacing=6)
+        for k in range(6):
+            ly = y + 140 + k * 38
+            g += rect(x + 34, ly, (w - 68) * (0.9 if k % 3 else 0.6), 12, DIM, 6)
+        g += icon_question(x + 34, y + h - 116, 44, AZURE, SOFT)
+        g += rect(x + 90, y + h - 100, w - 150, 12, DIM, 6)
+        # lente
+        lx, ly_, lr = x + w + 10, y + h - 120, 74
+        g += (f'<line x1="{lx + lr * 0.7:.1f}" y1="{ly_ + lr * 0.7:.1f}" x2="{lx + lr * 1.35:.1f}" y2="{ly_ + lr * 1.35:.1f}" '
+              f'stroke="{WHITE}" stroke-width="22" stroke-linecap="round"/>')
+        g += circle(lx, ly_, lr + 12, WHITE) + circle(lx, ly_, lr, AZURE_DARK)
+        g += circle(lx, ly_, lr, AZURE, extra=' opacity="0.55"')
+        g += f'<path d="M{lx - 36} {ly_ - 18} Q{lx - 30} {ly_ - 44} {lx - 4} {ly_ - 50}" fill="none" stroke="{WHITE}" stroke-width="8" stroke-linecap="round" opacity="0.8"/>'
+        return group(g, gid=f"{sid}-illustrazione")
+    return h + 40, draw
+
+
 def build_stack(sid, eyebrow_txt, blocks, source=None, gap=52, glow=(880, 300), top=210, bias=0.42):
     """Slide leggera: blocchi impilati e centrati tra l'intestazione e la fonte."""
     out = background(sid, glow=glow) + eyebrow(sid, eyebrow_txt) + svg_logo_topright(sid)
