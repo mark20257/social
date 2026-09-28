@@ -11,9 +11,9 @@ progetto Higgsfield «Makhymo · Red flag in ufficio». Sono in assets/photos/re
 Non sono scatti reali di un ufficio Makhymo.
 
 Testo del cliente, impaginato senza modifiche (una red flag per slide):
-  🚩 La sedia che scricchiola «da un po'» (da marzo).
+  🚩 La sedia che scricchiola «da un po'» (da marzo 2012).
   🚩 Il post-it sulla stampante: «NON usare il cassetto 2».
-  🚩 Il PC che ci mette dieci minuti ad accendersi, «ma poi va».
+  🚩 Il PC che ci mette dieci minuti ad accendersi.
   🚩 La sala riunioni che si prenota su un foglio A4 appeso alla porta.
   🚩 Il cavo HDMI che funziona solo se lo tieni con la mano.
   CTA (riscritta su richiesta, sostituisce «Aggiungi la tua nei commenti. Quella più
@@ -61,7 +61,7 @@ slides.append(slide(sid, out))
 sid = "slide-02"
 out = photo_slide(sid, "02_sedia.jpg", 1)
 bub, _ = speech_bubble(sid, M, 215, 640, ["La sedia"],
-                       ["che scricchiola «da un po’»", "**(da marzo).**"], tip=(520, 612), at=450)
+                       ["che scricchiola «da un po’»", "**(da marzo 2012).**"], tip=(520, 612), at=450)
 out += bub
 slides.append(slide(sid, out))
 
@@ -76,8 +76,8 @@ slides.append(slide(sid, out))
 # 04 · IL PC ---------------------------------------------------------------------
 sid = "slide-04"
 out = photo_slide(sid, "04_pc.jpg", 3)
-bub, _ = speech_bubble(sid, M, 215, 660, ["Il PC"],
-                       ["che ci mette dieci minuti ad", "accendersi, **«ma poi va».**"],
+bub, _ = speech_bubble(sid, M, 215, 670, ["Il PC"],
+                       ["che ci mette **dieci minuti** ad", "accendersi."],
                        tip=(560, 650), at=500)
 out += bub
 slides.append(slide(sid, out))
