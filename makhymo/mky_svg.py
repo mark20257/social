@@ -583,7 +583,10 @@ def _for_render(svg):
 
 
 def deliver(slides, slug, out_dir=None, sheet=True):
-    """Scrive Makhymo_<slug>_ALL_SLIDES.svg + PNG di controllo + contact sheet."""
+    """
+    Scrive Makhymo_<slug>_ALL_SLIDES.svg e, in Makhymo_<slug>_PNG/, una PNG 1080x1350
+    per slide (Makhymo_<slug>_NN.png, pronte per Instagram) + contact_sheet.jpg.
+    """
     import io
     import xml.etree.ElementTree as ET
 
@@ -591,7 +594,7 @@ def deliver(slides, slug, out_dir=None, sheet=True):
     from PIL import Image
 
     out_dir = out_dir or os.path.join(HERE, "output")
-    prev_dir = os.path.join(out_dir, f"preview_{slug}")
+    prev_dir = os.path.join(out_dir, f"Makhymo_{slug}_PNG")
     os.makedirs(prev_dir, exist_ok=True)
     for f in os.listdir(prev_dir):           # niente slide di versioni precedenti
         if f.endswith(".png"):
@@ -607,7 +610,7 @@ def deliver(slides, slug, out_dir=None, sheet=True):
     for i, s in enumerate(slides, 1):
         doc = slide_svg(s)
         n_text = doc.count("<text")
-        p = os.path.join(prev_dir, f"slide_{i:02d}.png")
+        p = os.path.join(prev_dir, f"Makhymo_{slug}_{i:02d}.png")
         cairosvg.svg2png(bytestring=_for_render(doc).encode(), write_to=p)
         pngs.append(p)
         print(f"slide {i:02d}: {n_text} blocchi <text>")
