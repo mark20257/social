@@ -525,6 +525,15 @@ def icon_question(x, y, size, c=WHITE, bg=NAVY, gid=None):
                  + circle(50, 76, 6, bg), x, y, size, gid)
 
 
+def icon_chat(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    """Due fumetti: dialogo."""
+    return _icon(
+        f'<path d="M6 14 Q6 6 14 6 L62 6 Q70 6 70 14 L70 44 Q70 52 62 52 L30 52 L16 64 L18 52 L14 52 Q6 52 6 44 Z" fill="{c}"/>'
+        + f'<path d="M38 60 L38 58 Q38 56 40 56 L86 56 Q94 56 94 64 L94 84 Q94 92 86 92 L82 92 L84 100 L72 92 L46 92 '
+          f'Q38 92 38 84 Z" fill="{c}" stroke="{bg}" stroke-width="5"/>'
+        + circle(24, 29, 5, bg) + circle(38, 29, 5, bg) + circle(52, 29, 5, bg), x, y, size, gid)
+
+
 def icon_eye_off(x, y, size, c=WHITE, bg=NAVY, gid=None):
     return _icon(
         f'<path d="M6 50 Q50 6 94 50 Q50 94 6 50 Z" fill="{c}"/>'
@@ -1001,14 +1010,25 @@ def build_layout_cta(sid, lead, headline, body, question, contacts, illu_fn, log
     """CTA: logo grande in alto, headline, corpo, domanda con illustrazione, contatti."""
     out = background(sid, glow=(540, 260))
     out += svg_logo_center(sid, 64, logo_h)
-    y = 64 + logo_h + 62 + BODY * 0.72
-    l, lh_, _ = text_block(W / 2, y, lead, BODY, 400, SOFT, CW, 1.4, anchor="middle", tid=f"{sid}-lead")
-    y += lh_ + 26 + 46 * 0.72
-    h, hh, _ = text_block(W / 2, y, headline, 46, 700, WHITE, CW, 1.16, anchor="middle", tid=f"{sid}-headline")
-    y += hh + 28 + BODY * 0.72
-    b, bh, _ = text_block(W / 2, y, body, BODY, 400, SOFT, CW, 1.4, anchor="middle", tid=f"{sid}-corpo")
-    y += bh + 48
-    out += group(l + h + b, gid=f"{sid}-testi")
+    y = 64 + logo_h + 62
+    parts = ""
+    if lead:
+        y += BODY * 0.72
+        l, lh_, _ = text_block(W / 2, y, lead, BODY, 400, SOFT, CW, 1.4, anchor="middle", tid=f"{sid}-lead")
+        parts += l
+        y += lh_ + 26
+    hs = 46 if (lead or body) else 54
+    y += hs * 0.72
+    h, hh, _ = text_block(W / 2, y, headline, hs, 700, WHITE, CW, 1.16, anchor="middle", tid=f"{sid}-headline")
+    parts += h
+    y += hh
+    if body:
+        y += 28 + BODY * 0.72
+        b, bh, _ = text_block(W / 2, y, body, BODY, 400, SOFT, CW, 1.4, anchor="middle", tid=f"{sid}-corpo")
+        parts += b
+        y += bh
+    y += 56
+    out += group(parts, gid=f"{sid}-testi")
     # contatti ancorati in basso
     c_rows = len(contacts)
     row = 62
@@ -1025,8 +1045,9 @@ def build_layout_cta(sid, lead, headline, body, question, contacts, illu_fn, log
     box_h = c_y0 - 40 - box_y
     ill_w = min(300, box_h - 60)
     q_w = CW - ill_w - 110
-    qb, qh, _ = text_block(0, 0, question, 42, 700, WHITE, q_w, 1.18)
-    qb, _, _ = text_block(M + 44, box_y + box_h / 2 - qh / 2 + 42 * 0.72, question, 42, 700, WHITE, q_w, 1.18,
+    qs = 42 if (lead or body) else 50
+    qb, qh, _ = text_block(0, 0, question, qs, 700, WHITE, q_w, 1.18)
+    qb, _, _ = text_block(M + 44, box_y + box_h / 2 - qh / 2 + qs * 0.72, question, qs, 700, WHITE, q_w, 1.18,
                           tid=f"{sid}-domanda")
     out += group(rect(M, box_y, CW, box_h, AZURE, 26) + qb
                  + illu_fn(sid, W - M - ill_w - 36, box_y + (box_h - ill_w) / 2, ill_w),
@@ -1181,6 +1202,221 @@ def build_layout_timeline(sid, n_tot, idx, eyebrow_txt, title, body, events, clo
         tl += svg_text(lx + r + 58, cy + 12, lab, BODY, 700, WHITE, tid=f"{sid}-evento-{i + 1}")
     out += group(tl, gid=f"{sid}-timeline")
     return _slide(sid, out)
+
+
+# --------------------------------------------------------------------------
+# Layout "leggeri": una slide = un concetto. Blocchi impilati e centrati
+# in verticale, testi grandi, molta aria.
+# --------------------------------------------------------------------------
+
+def blk_title(text, size=64, color=WHITE, lh=1.12):
+    h = block_height(text, size, 700, CW, lh)
+
+    def draw(sid, i, y):
+        svg, _, _ = text_block(M, y + size * 0.72, text, size, 700, color, CW, lh, tid=f"{sid}-titolo-{i}")
+        return svg
+    return h, draw
+
+
+def blk_text(text, size=40, color=SOFT, weight=400, lh=1.36):
+    h = block_height(text, size, weight, CW, lh)
+
+    def draw(sid, i, y):
+        svg, _, _ = text_block(M, y + size * 0.72, text, size, weight, color, CW, lh, tid=f"{sid}-testo-{i}")
+        return svg
+    return h, draw
+
+
+def blk_hero(icon_fn, r=100):
+    """Icona grande in un cerchio azzurro con alone."""
+    h = 2 * r + 24
+
+    def draw(sid, i, y):
+        cx, cy = M + r + 12, y + r + 12
+        return group(circle(cx, cy, r + 12, AZURE, extra=' opacity="0.25"') + circle(cx, cy, r, AZURE)
+                     + icon_fn(cx - r * 0.56, cy - r * 0.56, r * 1.12, WHITE, AZURE), gid=f"{sid}-icona-{i}")
+    return h, draw
+
+
+def blk_cards(cards, card_h=180):
+    """Griglia 2x2 di card con icona ed etichetta."""
+    gap = 22
+    rows = math.ceil(len(cards) / 2)
+    h = rows * card_h + (rows - 1) * gap
+
+    def draw(sid, i, y):
+        cw = (CW - gap) / 2
+        g = ""
+        for k, (icon_fn, lab) in enumerate(cards):
+            cx = M + (k % 2) * (cw + gap)
+            cy = y + (k // 2) * (card_h + gap)
+            g += rect(cx, cy, cw, card_h, NAVY_MID, 24)
+            isz = 70
+            g += icon_fn(cx + 30, cy + (card_h - isz) / 2, isz, AZURE_LIGHT, NAVY_MID)
+            tx = cx + 30 + isz + 24
+            tw_ = cw - (tx - cx) - 20
+            tb, th_, _ = text_block(tx, 0, lab, 38, 700, WHITE, tw_, 1.18)
+            tb, _, _ = text_block(tx, cy + card_h / 2 - th_ / 2 + 38 * 0.72, lab, 38, 700, WHITE, tw_, 1.18,
+                                  tid=f"{sid}-card-{k + 1}")
+            g += tb
+        return group(g, gid=f"{sid}-griglia")
+    return h, draw
+
+
+def blk_rows(items, row_h=150):
+    """Righe con icona in cerchio, collegate da una linea tratteggiata."""
+    gap = 18
+    h = len(items) * row_h + (len(items) - 1) * gap
+
+    def draw(sid, i, y):
+        r = 54
+        cx = M + r + 8
+        g = (f'<line x1="{cx}" y1="{y + row_h / 2:.1f}" x2="{cx}" y2="{y + h - row_h / 2:.1f}" '
+             f'stroke="{AZURE}" stroke-width="6" stroke-dasharray="4 12" stroke-linecap="round"/>')
+        for k, (icon_fn, lab) in enumerate(items):
+            ry = y + k * (row_h + gap)
+            cy = ry + row_h / 2
+            g += rect(cx, ry, W - M - cx, row_h, NAVY_MID, 24)
+            g += circle(cx, cy, r + 8, NAVY) + circle(cx, cy, r, AZURE)
+            g += icon_fn(cx - r * 0.58, cy - r * 0.58, r * 1.16, WHITE, AZURE)
+            tx = cx + r + 34
+            tb, th_, _ = text_block(tx, 0, lab, 42, 700, WHITE, W - M - tx - 24, 1.18)
+            tb, _, _ = text_block(tx, cy - th_ / 2 + 42 * 0.72, lab, 42, 700, WHITE, W - M - tx - 24, 1.18,
+                                  tid=f"{sid}-voce-{k + 1}")
+            g += tb
+        return group(g, gid=f"{sid}-elenco")
+    return h, draw
+
+
+def blk_pills(areas, pill_h=124):
+    gap = 18
+    rows = math.ceil(len(areas) / 2)
+    h = rows * pill_h + (rows - 1) * gap
+
+    def draw(sid, i, y):
+        pw = (CW - gap) / 2
+        g = ""
+        for k, (icon_fn, lab) in enumerate(areas):
+            px = M + (k % 2) * (pw + gap)
+            py = y + (k // 2) * (pill_h + gap)
+            g += rect(px, py, pw, pill_h, NAVY_MID, 22)
+            g += circle(px + 62, py + pill_h / 2, 38, AZURE)
+            g += icon_fn(px + 62 - 23, py + pill_h / 2 - 23, 46, WHITE, AZURE)
+            g += svg_text(px + 122, py + pill_h / 2 + 15, lab, 42, 700, WHITE, tid=f"{sid}-area-{k + 1}")
+        return group(g, gid=f"{sid}-aree")
+    return h, draw
+
+
+def blk_pictogram(big, sub, filled, total, panel_h=400):
+    def draw(sid, i, y):
+        pan = rect(M, y, CW, panel_h, NAVY_MID, 28)
+        pan += svg_text(M + 48, y + panel_h / 2 + 10, big, 124, 700, WHITE, tid=f"{sid}-numero")
+        cols = 5
+        rows = math.ceil(total / cols)
+        fig = 58
+        fx0 = W - M - 40 - cols * fig - (cols - 1) * 12
+        fy0 = y + (panel_h - rows * fig - (rows - 1) * 16) / 2
+        for k in range(total):
+            pan += icon_person(fx0 + (k % cols) * (fig + 12), fy0 + (k // cols) * (fig + 16), fig,
+                               AZURE if k < filled else NAVY_LINE)
+        sb, _, _ = text_block(M + 52, y + panel_h / 2 + 70, sub, 32, 700, AZURE_LIGHT, fx0 - 40 - (M + 52), 1.2,
+                              tid=f"{sid}-numero-sub")
+        return group(pan + sb, gid=f"{sid}-infografica")
+    return panel_h, draw
+
+
+def blk_bigstat(big, text, size=170):
+    th = block_height(text, 42, 700, CW, 1.25)
+    desc = size * 0.26 + 30                      # spazio per le discendenti (la "g" di giorni)
+    h = size * 0.74 + desc + th
+
+    def draw(sid, i, y):
+        svg = svg_text(M - 6, y + size * 0.74, big, size, 700, AZURE, tid=f"{sid}-numero")
+        tb, _, _ = text_block(M, y + size * 0.74 + desc + 42 * 0.72, text, 42, 700, WHITE, CW, 1.25,
+                              tid=f"{sid}-numero-testo")
+        return group(svg + tb, gid=f"{sid}-dato")
+    return h, draw
+
+
+def blk_doc(title, questions, row_h=100):
+    rows = math.ceil(len(questions) / 2)
+    head = 80
+    h = head + 26 + rows * row_h + 20
+
+    def draw(sid, i, y):
+        dx, dw = M, CW
+        d = rect(dx + 14, y + 14, dw, h, NAVY_DEEP, 22, extra=' opacity="0.6"')
+        d += rect(dx, y, dw, h, SOFT, 22) + rect(dx, y, dw, head, AZURE, 22) + rect(dx, y + head - 30, dw, 30, AZURE)
+        d += svg_text(dx + 34, y + head / 2 + 11, title, 30, 700, WHITE, spacing=2)
+        cw_ = (dw - 68 - 24) / 2
+        for k, q in enumerate(questions):
+            cx = dx + 34 + (k // rows) * (cw_ + 24)
+            cy = y + head + 26 + (k % rows) * row_h
+            d += icon_question(cx, cy + (row_h - 42) / 2, 42, AZURE, SOFT)
+            qb, qh, _ = text_block(cx + 56, 0, q, 32, 700, NAVY_DEEP, cw_ - 60, 1.12)
+            qb, _, _ = text_block(cx + 56, cy + row_h / 2 - qh / 2 + 32 * 0.72, q, 32, 700, NAVY_DEEP, cw_ - 60,
+                                  1.12, tid=f"{sid}-domanda-{k + 1}")
+            d += qb
+        return group(d, gid=f"{sid}-documento")
+    return h, draw
+
+
+def blk_donts(items, row_h=176):
+    h = len(items) * row_h
+
+    def draw(sid, i, y):
+        g = ""
+        for k, txt in enumerate(items):
+            ry = y + k * row_h
+            cy = ry + row_h / 2
+            g += icon_x(M, cy - 42, 84, AZURE, NAVY)
+            tb, th_, _ = text_block(M + 118, 0, txt, 46, 700, WHITE, CW - 124, 1.18)
+            tb, _, _ = text_block(M + 118, cy - th_ / 2 + 46 * 0.72, txt, 46, 700, WHITE, CW - 124, 1.18,
+                                  tid=f"{sid}-voce-{k + 1}")
+            g += tb
+            if k < len(items) - 1:
+                g += (f'<line x1="{M + 118}" y1="{ry + row_h:.1f}" x2="{W - M}" y2="{ry + row_h:.1f}" '
+                      f'stroke="{NAVY_LINE}" stroke-width="2"/>')
+        return group(g, gid=f"{sid}-elenco")
+    return h, draw
+
+
+def blk_timeline(events, step=120):
+    h = len(events) * step
+
+    def draw(sid, i, y):
+        lx = M + 48
+        r = 44
+        g = (f'<line x1="{lx}" y1="{y + step / 2:.1f}" x2="{lx}" y2="{y + h - step / 2:.1f}" '
+             f'stroke="{AZURE}" stroke-width="6" stroke-linecap="round"/>')
+        for k, (icon_fn, lab) in enumerate(events):
+            cy = y + k * step + step / 2
+            g += circle(lx, cy, r + 8, NAVY) + circle(lx, cy, r, AZURE)
+            g += icon_fn(lx - r * 0.56, cy - r * 0.56, r * 1.12, WHITE, AZURE)
+            g += rect(lx + r + 26, cy - step / 2 + 9, W - M - (lx + r + 26), step - 18, NAVY_MID, 20)
+            g += svg_text(lx + r + 56, cy + 14, lab, 40, 700, WHITE, tid=f"{sid}-evento-{k + 1}")
+        return group(g, gid=f"{sid}-timeline")
+    return h, draw
+
+
+def build_stack(sid, eyebrow_txt, blocks, source=None, gap=52, glow=(880, 300), top=210, bias=0.42):
+    """Slide leggera: blocchi impilati e centrati tra l'intestazione e la fonte."""
+    out = background(sid, glow=glow) + eyebrow(sid, eyebrow_txt) + svg_logo_topright(sid)
+    if source:
+        src, src_top = source_block(sid, source)
+        bottom = src_top - 44
+    else:
+        src, bottom = "", 1290
+    gaps = gap if isinstance(gap, (list, tuple)) else [gap] * (len(blocks) - 1)
+    total = sum(h for h, _ in blocks) + sum(gaps[:len(blocks) - 1])
+    avail = bottom - top
+    assert total <= avail + 1, f"{sid}: contenuto troppo alto ({total:.0f} > {avail:.0f})"
+    y = top + (avail - total) * bias
+    body = ""
+    for i, (h, draw) in enumerate(blocks):
+        body += draw(sid, i + 1, y)
+        y += h + (gaps[i] if i < len(blocks) - 1 else 0)
+    return _slide(sid, out + group(body, gid=f"{sid}-contenuto") + src)
 
 
 # --------------------------------------------------------------------------

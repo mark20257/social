@@ -23,8 +23,8 @@ from build_carousel import *  # noqa: F401,F403
 
 SLUG = "PrimaConsulenza"
 CRUCIAL = "/Volumes/Crucial X6/Allianz Assicurazioni/2026/10 - OTTOBRE/production/project/"
-N = 8
 
+# una slide = un concetto: testi brevi, titoli grandi, un elemento visivo
 slides = []
 
 # 01 · COVER --------------------------------------------------------------------
@@ -34,101 +34,93 @@ slides.append(build_cover_photo(
     "Cosa succede davvero alla prima consulenza in agenzia?",
     "Ti raccontiamo come lavoriamo, ==passo dopo passo.==",
     group(icon_family(300, 170, 480, AZURE_LIGHT, NAVY), gid="slide-01-illustrazione"),
-    photo="Madonia_Cover_PrimaConsulenza.jpg",   # assets/covers/; se manca resta l'illustrazione
+    photo="Madonia_Cover_PrimaConsulenza.jpg",
 ))
 
-# 02 · GRID: ci conosciamo --------------------------------------------------------
-slides.append(build_layout_grid(
-    "slide-02", N, 2, "PASSO 1 · CI CONOSCIAMO",
-    lead="Sembra strano, ma al primo incontro parliamo poco di polizze.",
-    question="Prima vogliamo capire chi sei e cosa ti sta a cuore.",
-    cards=[(icon_work, "Lavoro e reddito"), (icon_family, "Famiglia e persone care"),
-           (icon_house, "Casa e patrimonio"), (icon_project, "Progetti e obiettivi")],
-    closing="La polizza viene dopo: prima viene la tua situazione.",
-    stat=icon_scale,
-    stat_txt="Non è solo un metodo: per legge vanno individuate le tue esigenze prima di proporti un contratto.",
-    source="Fonti: Codice delle Assicurazioni Private, art. 119-bis; Regolamento IVASS n. 40/2018.",
-))
+# 02 · Hook -----------------------------------------------------------------------
+slides.append(build_stack("slide-02", "PRIMA CONSULENZA", [
+    blk_hero(icon_chat),
+    blk_title("Al primo incontro parliamo poco di polizze.", 66),
+    blk_text("Sembra strano. ==Ecco perché.==", 44, WHITE),
+], glow=(300, 500)))
 
-# 03 · PEOPLE: l'analisi ------------------------------------------------------------
-slides.append(build_layout_people(
-    "slide-03", N, 3, "PASSO 2 · L’ANALISI",
-    title="Sai davvero cosa ti copre già?",
-    body="Mettiamo in fila le coperture che hai, anche quelle dimenticate, e le confrontiamo con "
-         "i rischi reali. Spesso il punto debole è quello che nessuno ha mai guardato. "
-         "La previdenza, per esempio:",
-    big="4 su 10",
-    big_sub="lavoratori hanno una\npensione complementare",
-    filled=4, total=10,
-    areas=[(icon_shield, "Protezione"), (icon_house, "Casa"),
-           (icon_pension, "Previdenza"), (icon_piggy, "Risparmio")],
-    source="Fonte: COVIP, Relazione annuale 2026: iscritti alla previdenza complementare "
-           "pari al 39,9% delle forze di lavoro a fine 2025.",
-))
+# 03 · Passo 1: chi sei --------------------------------------------------------------
+slides.append(build_stack("slide-03", "PASSO 1 · CI CONOSCIAMO", [
+    blk_title("Prima vogliamo capire chi sei."),
+    blk_cards([(icon_work, "Lavoro e reddito"), (icon_family, "Famiglia e persone care"),
+               (icon_house, "Casa e patrimonio"), (icon_project, "Progetti e obiettivi")]),
+], glow=(900, 900)))
 
-# 04 · SCENARIOS: la proposta --------------------------------------------------------
-slides.append(build_layout_scenarios(
-    "slide-04", N, 4, "PASSO 3 · LA PROPOSTA",
-    quote="Dall’analisi nasce un piano su misura.",
-    answer="Con un perché per ogni scelta.",
-    body="Non una lista di prodotti, ma le priorità in ordine: così sai da dove partire, "
-         "anche se non vuoi fare tutto subito.",
-    lead="Per ogni punto ti spieghiamo:",
-    items=[
-        (icon_target, "01 · COSA", "Cosa conviene fare"),
-        (icon_scale, "02 · PERCHÉ", "Perché è importante proprio per te"),
-        (icon_calendar, "03 · QUANDO", "Da cosa partire e cosa può aspettare"),
-    ],
-    closing="Quando c’è consulenza, la raccomandazione è personalizzata e motivata: "
-            "lo prevede l’art. 119-ter del Codice delle Assicurazioni Private.",
-))
+# 04 · Passo 1: la norma -------------------------------------------------------------
+slides.append(build_stack("slide-04", "PASSO 1 · CI CONOSCIAMO", [
+    blk_hero(icon_scale),
+    blk_title("Non è solo un metodo."),
+    blk_text("Per legge, prima di proporti un contratto vanno individuate **le tue esigenze.**"),
+], source="Fonti: Codice delle Assicurazioni Private, art. 119-bis; Regolamento IVASS n. 40/2018.",
+    glow=(250, 350)))
 
-# 05 · DOC: il DIP --------------------------------------------------------------------
-slides.append(build_layout_doc(
-    "slide-05", N, 5, "PASSO 4 · PRIMA DI FIRMARE",
-    title="Hai mai letto il DIP della tua polizza?",
-    body="È il documento informativo precontrattuale: una scheda breve, con lo stesso schema "
-         "per tutte le polizze danni, che ricevi prima di firmare. Lo leggiamo insieme, "
-         "domanda per domanda.",
-    doc_title="DIP DANNI",
-    questions=["Che cosa è assicurato?", "Che cosa non è assicurato?",
-               "Ci sono limiti di copertura?", "Dove vale la copertura?",
-               "Che obblighi ho?", "Quando e come devo pagare?",
-               "Quando comincia e quando finisce?", "Come posso disdire la polizza?"],
-    source="Fonti: Regolamento IVASS n. 41/2018; Regolamento di esecuzione (UE) 2017/1469.",
-))
+# 05 · Passo 2: l'analisi -------------------------------------------------------------
+slides.append(build_stack("slide-05", "PASSO 2 · L’ANALISI", [
+    blk_title("Sai davvero cosa ti copre già?"),
+    blk_text("Mettiamo in fila le coperture che hai, anche quelle dimenticate."),
+    blk_pills([(icon_shield, "Protezione"), (icon_house, "Casa"),
+               (icon_pension, "Previdenza"), (icon_piggy, "Risparmio")]),
+], glow=(880, 1000)))
 
-# 06 · DONTS: cosa non facciamo ----------------------------------------------------------
-slides.append(build_layout_donts(
-    "slide-06", N, 6, "COSA NON FACCIAMO",
-    title="Tre cose che in agenzia non succedono.",
-    items=["Proporti una polizza prima di conoscerti.",
-           "Consigliare la stessa soluzione a tutti.",
-           "Metterti fretta per firmare subito."],
-    big="30 giorni",
-    big_txt="per ripensarci: dai contratti vita puoi recedere entro 30 giorni dalla conclusione.",
-    source="Fonte: Codice delle Assicurazioni Private, art. 177 (contratti vita individuali "
-           "di durata superiore a sei mesi).",
-))
+# 06 · Passo 2: il punto debole ---------------------------------------------------------
+slides.append(build_stack("slide-06", "PASSO 2 · L’ANALISI", [
+    blk_title("Il punto debole? Spesso è la previdenza."),
+    blk_pictogram("4 su 10", "lavoratori hanno una\npensione complementare", 4, 10),
+], source="Fonte: COVIP, Relazione annuale 2026: iscritti alla previdenza complementare "
+          "pari al 39,9% delle forze di lavoro a fine 2025.", glow=(860, 760)))
 
-# 07 · TIMELINE: nel tempo ---------------------------------------------------------------
-slides.append(build_layout_timeline(
-    "slide-07", N, 7, "PASSO 5 · NEL TEMPO",
-    title="E dopo la firma?",
-    body="Le esigenze cambiano e il piano deve cambiare con loro. Per questo ci rivediamo con "
-         "verifiche periodiche e ogni volta che arriva una svolta:",
-    events=[(icon_work, "Un nuovo lavoro"), (icon_heart, "Matrimonio o convivenza"),
-            (icon_family, "La nascita di un figlio"), (icon_house, "Una casa o un mutuo"),
-            (icon_pension, "L’avvicinarsi della pensione")],
-    closing="Una copertura giusta oggi può non esserlo tra cinque anni.",
-))
+# 07 · Passo 3: la proposta --------------------------------------------------------------
+slides.append(build_stack("slide-07", "PASSO 3 · LA PROPOSTA", [
+    blk_title("Un piano su misura, con un perché per ogni scelta."),
+    blk_rows([(icon_target, "Cosa conviene fare"), (icon_scale, "Perché proprio per te"),
+              (icon_calendar, "Da dove partire")]),
+], glow=(160, 1100)))
 
-# 08 · CTA -----------------------------------------------------------------------------
+# 08 · Passo 4: il DIP ------------------------------------------------------------------
+slides.append(build_stack("slide-08", "PASSO 4 · PRIMA DI FIRMARE", [
+    blk_title("Hai mai letto il DIP della tua polizza?"),
+    blk_text("Lo leggiamo insieme, domanda per domanda."),
+    blk_doc("DIP DANNI", ["Che cosa è assicurato?", "Che cosa non è assicurato?",
+                          "Ci sono limiti di copertura?", "Dove vale la copertura?",
+                          "Che obblighi ho?", "Quando e come devo pagare?",
+                          "Quando comincia e quando finisce?", "Come posso disdire la polizza?"]),
+], source="Fonti: Regolamento IVASS n. 41/2018; Regolamento di esecuzione (UE) 2017/1469.",
+    gap=[30, 44], glow=(200, 900)))
+
+# 09 · Cosa non facciamo --------------------------------------------------------------------
+slides.append(build_stack("slide-09", "COSA NON FACCIAMO", [
+    blk_title("Tre cose che in agenzia non succedono."),
+    blk_donts(["Proporti una polizza prima di conoscerti.",
+               "Consigliare la stessa soluzione a tutti.",
+               "Metterti fretta per firmare subito."]),
+], glow=(880, 300)))
+
+# 10 · Nessuna fretta: 30 giorni ------------------------------------------------------------
+slides.append(build_stack("slide-10", "NESSUNA FRETTA", [
+    blk_hero(icon_calendar),
+    blk_bigstat("30 giorni", "per ripensarci: dai contratti vita puoi recedere entro 30 giorni dalla conclusione."),
+], source="Fonte: Codice delle Assicurazioni Private, art. 177 (contratti vita individuali "
+          "di durata superiore a sei mesi).", glow=(300, 450)))
+
+# 11 · Passo 5: nel tempo ------------------------------------------------------------------
+slides.append(build_stack("slide-11", "PASSO 5 · NEL TEMPO", [
+    blk_title("E dopo la firma? Ci rivediamo quando la vita cambia."),
+    blk_timeline([(icon_work, "Un nuovo lavoro"), (icon_heart, "Matrimonio o convivenza"),
+                  (icon_family, "La nascita di un figlio"), (icon_house, "Una casa o un mutuo"),
+                  (icon_pension, "Verso la pensione")]),
+], glow=(180, 700)))
+
+# 12 · CTA ------------------------------------------------------------------------------
 slides.append(build_layout_cta(
-    "slide-08",
-    lead="La prima consulenza è il punto di partenza.",
+    "slide-12",
+    lead=None,
     headline="Partiamo dalla tua situazione, non da un prodotto.",
-    body="Se vuoi, porta le polizze che hai già: **cominciamo da lì.**",
+    body=None,
     question="Fissa il tuo\nprimo incontro\nin agenzia.",
     contacts=[(icon_phone, "0141 557260"),
               (icon_mail, "asti4@ageallianz.it"),
