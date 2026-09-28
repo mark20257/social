@@ -463,6 +463,68 @@ def icon_web(x, y, size, c=WHITE, bg=NAVY, gid=None):
         + rect(14, 46, 72, 8, c) + rect(46, 14, 8, 72, c), x, y, size, gid)
 
 
+def icon_work(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    """Valigetta: lavoro e reddito."""
+    return _icon(
+        f'<path d="M36 22 L36 14 Q36 8 42 8 L58 8 Q64 8 64 14 L64 22" fill="none" stroke="{c}" stroke-width="7"/>'
+        + rect(6, 22, 88, 66, c, 10) + rect(6, 46, 88, 6, bg) + rect(42, 40, 16, 18, c, 3)
+        + rect(45, 43, 10, 12, bg, 2), x, y, size, gid)
+
+
+def icon_family(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    """Due adulti e un bambino: famiglia."""
+    return _icon(
+        circle(28, 22, 12, c) + f'<path d="M8 90 L8 56 Q8 40 28 40 Q48 40 48 56 L48 90 Z" fill="{c}"/>'
+        + circle(72, 22, 12, c) + f'<path d="M52 90 L52 56 Q52 40 72 40 Q92 40 92 56 L92 90 Z" fill="{c}"/>'
+        + circle(50, 54, 12, bg) + circle(50, 54, 9, c)
+        + f'<path d="M34 94 L34 80 Q34 68 50 68 Q66 68 66 80 L66 94 Z" fill="{c}" stroke="{bg}" stroke-width="4"/>',
+        x, y, size, gid)
+
+
+def icon_person(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    return _icon(circle(50, 22, 18, c)
+                 + f'<path d="M18 98 L18 62 Q18 44 50 44 Q82 44 82 62 L82 98 Z" fill="{c}"/>', x, y, size, gid)
+
+
+def icon_scale(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    """Bilancia: la norma."""
+    return _icon(
+        rect(46, 12, 8, 72, c, 3) + rect(26, 84, 48, 10, c, 4) + rect(12, 20, 76, 7, c, 3)
+        + circle(50, 14, 7, c)
+        + f'<path d="M20 26 L8 56 L32 56 Z M80 26 L68 56 L92 56 Z" fill="none" stroke="{c}" stroke-width="4" stroke-linejoin="round"/>'
+        + f'<path d="M4 56 L36 56 Q34 70 20 70 Q6 70 4 56 Z M64 56 L96 56 Q94 70 80 70 Q66 70 64 56 Z" fill="{c}"/>',
+        x, y, size, gid)
+
+
+def icon_heart(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    return _icon(
+        f'<path d="M50 90 Q10 62 8 36 Q8 12 30 12 Q44 12 50 26 Q56 12 70 12 Q92 12 92 36 Q90 62 50 90 Z" fill="{c}"/>',
+        x, y, size, gid)
+
+
+def icon_piggy(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    """Salvadanaio: risparmio."""
+    return _icon(
+        f'<ellipse cx="50" cy="54" rx="38" ry="30" fill="{c}"/>'
+        + f'<path d="M24 32 L28 14 L42 28 Z" fill="{c}"/>'
+        + rect(22, 74, 12, 20, c, 4) + rect(62, 74, 12, 20, c, 4)
+        + f'<ellipse cx="10" cy="54" rx="8" ry="10" fill="{c}"/>'
+        + rect(40, 30, 22, 6, bg, 3) + circle(28, 46, 4, bg), x, y, size, gid)
+
+
+def icon_x(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    return _icon(circle(50, 50, 46, c)
+                 + f'<path d="M32 32 L68 68 M68 32 L32 68" stroke="{bg}" stroke-width="10" stroke-linecap="round"/>',
+                 x, y, size, gid)
+
+
+def icon_question(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    return _icon(circle(50, 50, 46, c)
+                 + f'<path d="M36 38 Q36 22 50 22 Q64 22 64 36 Q64 46 52 50 L50 60" fill="none" stroke="{bg}" '
+                   f'stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>'
+                 + circle(50, 76, 6, bg), x, y, size, gid)
+
+
 def icon_eye_off(x, y, size, c=WHITE, bg=NAVY, gid=None):
     return _icon(
         f'<path d="M6 50 Q50 6 94 50 Q50 94 6 50 Z" fill="{c}"/>'
@@ -576,7 +638,7 @@ def illu_globe(sid, cx, cy, r):
         gid=f"{sid}-illustrazione")
 
 
-def illu_calendar_savings(sid, x, y, w):
+def illu_calendar_savings(sid, x, y, w, label="OTTOBRE"):
     """Pagina di calendario con una data cerchiata e un salvadanaio di monete."""
     s = w / 400
     days = ""
@@ -596,7 +658,7 @@ def illu_calendar_savings(sid, x, y, w):
         f'stroke="{NAVY}" stroke-width="3"/>' for i in range(6))
     return group(
         rect(0, 20, 400, 380, SOFT, 26) + rect(0, 20, 400, 96, NAVY, 26) + rect(0, 80, 400, 36, NAVY)
-        + svg_text(200, 92, "OTTOBRE", 40, 700, WHITE, "middle", spacing=4)
+        + svg_text(200, 92, label, 40, 700, WHITE, "middle", spacing=4)
         + rect(70, 0, 18, 56, NAVY_DEEP, 9) + rect(312, 0, 18, 56, NAVY_DEEP, 9)
         + f'<g transform="translate(0 0)">{days}</g>' + ring + coins,
         gid=f"{sid}-illustrazione", transform=f"translate({x} {y}) scale({s:.4f})")
@@ -893,11 +955,16 @@ def build_layout_grid(sid, n_tot, idx, eyebrow_txt, lead, question, cards, closi
     out += group(l + q, gid=f"{sid}-testi")
     src, src_top = source_block(sid, source)
     # dato in fondo
-    st_h = 170
+    st_h = 170 if not callable(stat) else max(170, block_height(stat_txt, 32, 700, CW - 204, 1.25) + 70)
     st_y = src_top - 36 - st_h
     st = rect(M, st_y, CW, st_h, AZURE, 24)
-    st += svg_text(M + 40, st_y + st_h / 2 + 34, stat, 96, 700, WHITE)
-    sw = text_width(stat, 96, 700) + 40 + 34
+    if callable(stat):
+        st += circle(M + 40 + 50, st_y + st_h / 2, 50, WHITE)
+        st += stat(M + 40 + 22, st_y + st_h / 2 - 28, 56, AZURE, WHITE)
+        sw = 40 + 100 + 34
+    else:
+        st += svg_text(M + 40, st_y + st_h / 2 + 34, stat, 96, 700, WHITE)
+        sw = text_width(stat, 96, 700) + 40 + 34
     s_t, s_h, _ = text_block(M + sw, 0, stat_txt, 32, 700, WHITE, CW - sw - 30, 1.25)
     s_t, _, _ = text_block(M + sw, st_y + st_h / 2 - s_h / 2 + 32 * 0.72, stat_txt, 32, 700, WHITE,
                            CW - sw - 30, 1.25, tid=f"{sid}-dato-testo")
@@ -964,6 +1031,155 @@ def build_layout_cta(sid, lead, headline, body, question, contacts, illu_fn, log
     out += group(rect(M, box_y, CW, box_h, AZURE, 26) + qb
                  + illu_fn(sid, W - M - ill_w - 36, box_y + (box_h - ill_w) / 2, ill_w),
                  gid=f"{sid}-box-domanda")
+    return _slide(sid, out)
+
+
+def build_layout_people(sid, n_tot, idx, eyebrow_txt, title, body, big, big_sub, filled, total, areas, source):
+    """Pittogramma a persone (es. 4 su 10) + testo + aree analizzate."""
+    out = background(sid, glow=(860, 760)) + eyebrow(sid, eyebrow_txt) + svg_logo_topright(sid)
+    y = 262
+    t, th, _ = text_block(M, y, title, 50, 700, WHITE, CW, 1.15, tid=f"{sid}-titolo")
+    y += th + 34 + BODY * 0.72
+    b, bh, _ = text_block(M, y, body, BODY, 400, SOFT, CW, 1.42, tid=f"{sid}-corpo")
+    y += bh
+    out += group(t + b, gid=f"{sid}-testi")
+    src, src_top = source_block(sid, source)
+    # aree in basso
+    pill_h = 84
+    gap = 16
+    cols = 2
+    rows_ = math.ceil(len(areas) / cols)
+    pill_y = src_top - 40 - rows_ * pill_h - (rows_ - 1) * gap
+    pw = (CW - gap * (cols - 1)) / cols
+    ar = ""
+    for i, (icon_fn, lab) in enumerate(areas):
+        px = M + (i % cols) * (pw + gap)
+        py = pill_y + (i // cols) * (pill_h + gap)
+        ar += rect(px, py, pw, pill_h, NAVY_MID, 20)
+        ar += icon_fn(px + 26, py + (pill_h - 46) / 2, 46, AZURE_LIGHT, NAVY_MID)
+        ar += svg_text(px + 94, py + pill_h / 2 + 12, lab, BODY, 700, WHITE, tid=f"{sid}-area-{i + 1}")
+    out += group(ar, gid=f"{sid}-aree")
+    # pannello dato: numero grande + pittogramma
+    p_top = y + 50
+    p_bot = pill_y - 36
+    ph = p_bot - p_top
+    pan = rect(M, p_top, CW, ph, NAVY_MID, 26)
+    pan += svg_text(M + 44, p_top + ph / 2 + 8, big, 110, 700, WHITE, tid=f"{sid}-numero")
+    # 10 figure su due righe, a destra
+    cols = 5
+    rows = math.ceil(total / cols)
+    fig = min(60, (ph - 60) / rows - 12)
+    fx0 = W - M - 36 - cols * fig - (cols - 1) * 12
+    sub, sh, _ = text_block(M + 48, p_top + ph / 2 + 66, big_sub, 32, 700, AZURE_LIGHT,
+                            fx0 - 36 - (M + 48), 1.2, tid=f"{sid}-numero-sub")
+    pan += sub
+    fy0 = p_top + (ph - rows * fig - (rows - 1) * 14) / 2
+    for k in range(total):
+        cx = fx0 + (k % cols) * (fig + 12)
+        cy = fy0 + (k // cols) * (fig + 14)
+        pan += icon_person(cx, cy, fig, AZURE if k < filled else NAVY_LINE)
+    out += group(pan, gid=f"{sid}-infografica") + src
+    return _slide(sid, out)
+
+
+def build_layout_doc(sid, n_tot, idx, eyebrow_txt, title, body, doc_title, questions, source):
+    """Documento stilizzato con l'elenco delle domande standard (es. DIP)."""
+    out = background(sid, glow=(200, 900)) + eyebrow(sid, eyebrow_txt) + svg_logo_topright(sid)
+    y = 262
+    t, th, _ = text_block(M, y, title, 50, 700, WHITE, CW, 1.15, tid=f"{sid}-titolo")
+    y += th + 34 + BODY * 0.72
+    b, bh, _ = text_block(M, y, body, BODY, 400, SOFT, CW, 1.42, tid=f"{sid}-corpo")
+    y += bh
+    out += group(t + b, gid=f"{sid}-testi")
+    src, src_top = source_block(sid, source)
+    d_top = y + 48
+    d_bot = src_top - 36
+    dh = d_bot - d_top
+    dx = M + 30
+    dw = CW - 60
+    doc = rect(dx + 14, d_top + 14, dw, dh, NAVY_DEEP, 20, extra=' opacity="0.6"')
+    doc += rect(dx, d_top, dw, dh, SOFT, 20)
+    doc += rect(dx, d_top, dw, 76, AZURE, 20) + rect(dx, d_top + 40, dw, 36, AZURE)
+    doc += svg_text(dx + 30, d_top + 50, doc_title, 30, 700, WHITE, spacing=2)
+    n = len(questions)
+    cols = 2
+    rows = math.ceil(n / cols)
+    ry0 = d_top + 76 + 22
+    rh = (dh - 76 - 44) / rows
+    cw_ = (dw - 60 - 20) / cols
+    for i, q in enumerate(questions):
+        cx = dx + 30 + (i // rows) * (cw_ + 20)
+        cy = ry0 + (i % rows) * rh
+        doc += icon_question(cx, cy + (rh - 38) / 2, 38, AZURE, SOFT)
+        qb, qh, _ = text_block(cx + 52, 0, q, 30, 700, NAVY_DEEP, cw_ - 56, 1.12)
+        qb, _, _ = text_block(cx + 52, cy + rh / 2 - qh / 2 + 30 * 0.72, q, 30, 700, NAVY_DEEP, cw_ - 56, 1.12,
+                              tid=f"{sid}-domanda-{i + 1}")
+        doc += qb
+    out += group(doc, gid=f"{sid}-documento") + src
+    return _slide(sid, out)
+
+
+def build_layout_donts(sid, n_tot, idx, eyebrow_txt, title, items, big, big_txt, source):
+    """Elenco di cose che non facciamo + box con un dato di garanzia."""
+    out = background(sid, glow=(880, 300)) + eyebrow(sid, eyebrow_txt) + svg_logo_topright(sid)
+    y = 262
+    t, th, _ = text_block(M, y, title, 56, 700, WHITE, CW, 1.12, tid=f"{sid}-titolo")
+    y += th + 56
+    out += group(t, gid=f"{sid}-testi")
+    src, src_top = source_block(sid, source)
+    box_h = 250
+    box_y = src_top - 36 - box_h
+    bx = rect(M, box_y, CW, box_h, AZURE, 26)
+    bx += svg_text(M + 44, box_y + 118, big, 96, 700, WHITE, tid=f"{sid}-numero")
+    bt, bth, _ = text_block(M + 44, box_y + 176, big_txt, 32, 700, WHITE, CW - 88, 1.25, tid=f"{sid}-numero-testo")
+    bx += bt
+    out += group(bx, gid=f"{sid}-garanzia")
+    avail = box_y - 40 - y
+    row_h = avail / len(items)
+    li = ""
+    for i, txt in enumerate(items):
+        ry = y + i * row_h
+        cy = ry + row_h / 2
+        li += icon_x(M, cy - 34, 68, AZURE, NAVY)
+        tb, tbh, _ = text_block(M + 100, 0, txt, 38, 700, WHITE, CW - 110, 1.2)
+        tb, _, _ = text_block(M + 100, cy - tbh / 2 + 38 * 0.72, txt, 38, 700, WHITE, CW - 110, 1.2,
+                              tid=f"{sid}-voce-{i + 1}")
+        li += tb
+        if i < len(items) - 1:
+            li += f'<line x1="{M + 100}" y1="{ry + row_h:.1f}" x2="{W - M}" y2="{ry + row_h:.1f}" stroke="{NAVY_LINE}" stroke-width="2"/>'
+    out += group(li, gid=f"{sid}-elenco") + src
+    return _slide(sid, out)
+
+
+def build_layout_timeline(sid, n_tot, idx, eyebrow_txt, title, body, events, closing):
+    """Linea del tempo verticale con eventi di vita + chiusura in box."""
+    out = background(sid, glow=(180, 700)) + eyebrow(sid, eyebrow_txt) + svg_logo_topright(sid)
+    y = 262
+    t, th, _ = text_block(M, y, title, 56, 700, WHITE, CW, 1.12, tid=f"{sid}-titolo")
+    y += th + 34 + BODY * 0.72
+    b, bh, _ = text_block(M, y, body, BODY, 400, SOFT, CW, 1.42, tid=f"{sid}-corpo")
+    y += bh + 44
+    out += group(t + b, gid=f"{sid}-testi")
+    cl_h = block_height(closing, 36, 700, CW - 80, 1.25)
+    box_h = cl_h + 76
+    box_y = 1300 - box_h
+    c_svg, _, _ = text_block(W / 2, box_y + 38 + 36 * 0.72, closing, 36, 700, WHITE, CW - 80, 1.25,
+                             anchor="middle", tid=f"{sid}-chiusura")
+    out += group(rect(M, box_y, CW, box_h, AZURE, 24) + c_svg, gid=f"{sid}-chiusura-g")
+    avail = box_y - 36 - y
+    n = len(events)
+    step = avail / n
+    lx = M + 44
+    tl = (f'<line x1="{lx}" y1="{y + step / 2:.1f}" x2="{lx}" y2="{y + avail - step / 2:.1f}" '
+          f'stroke="{AZURE}" stroke-width="6" stroke-linecap="round"/>')
+    for i, (icon_fn, lab) in enumerate(events):
+        cy = y + i * step + step / 2
+        r = min(40, step / 2 - 6)
+        tl += circle(lx, cy, r + 8, NAVY) + circle(lx, cy, r, AZURE)
+        tl += icon_fn(lx - r * 0.55, cy - r * 0.55, r * 1.1, WHITE, AZURE)
+        tl += rect(lx + r + 30, cy - step / 2 + 8, W - M - (lx + r + 30), step - 16, NAVY_MID, 18)
+        tl += svg_text(lx + r + 58, cy + 12, lab, BODY, 700, WHITE, tid=f"{sid}-evento-{i + 1}")
+    out += group(tl, gid=f"{sid}-timeline")
     return _slide(sid, out)
 
 
