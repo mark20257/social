@@ -1,6 +1,11 @@
 """
 Carosello Makhymo 01 · Red flag in ufficio che ignori da mesi. 🚩
 
+Stile 'a scena' (v2): come i post prodotto di riferimento, ogni slide mostra un
+oggetto appoggiato su un tavolo bianco, con una macchia ondulata rossa dietro e un
+fumetto bianco con titolo in grassetto e testo. Colori Makhymo: parete navy,
+rosso #C6183D, bianco, kraft.
+
 Testo del cliente, impaginato senza modifiche (una red flag per slide):
   🚩 La sedia che scricchiola «da un po'» (da marzo).
   🚩 Il post-it sulla stampante: «NON usare il cassetto 2».
@@ -9,7 +14,9 @@ Testo del cliente, impaginato senza modifiche (una red flag per slide):
   🚩 Il cavo HDMI che funziona solo se lo tieni con la mano.
   Aggiungi la tua nei commenti. Quella più votata la risolviamo noi, sul serio. 👇
 
-Le emoji sono ridisegnate come vettori: 🚩 = bandierina rossa, 👇 = freccia a mano.
+Nel fumetto il soggetto fa da titolo e il resto della frase da testo, come
+«Colla in barattolo» + descrizione nel riferimento: la frase resta identica.
+Le emoji sono ridisegnate come vettori (🚩 bandierina, 👇 freccia).
 Nessun dato statistico: nessuna fonte da citare.
 """
 
@@ -18,7 +25,6 @@ import math
 from mky_svg import *  # noqa: F401,F403
 
 SLUG = "RedFlag"
-N_FLAGS = 5
 
 INK = "#22376B"          # penna blu delle scritte a mano
 POSTIT = "#F7D64A"
@@ -29,6 +35,14 @@ WOOD_DARK = "#B3834F"
 PLASTIC = "#F3F5F9"
 PLASTIC_2 = "#E3E8EF"
 LINE = "#C9D0DC"
+SKIN = "#E9B48C"
+SKIN_DARK = "#CF9468"
+FABRIC = "#2F3A50"
+FABRIC_LIGHT = "#3B4862"
+FABRIC_DARK = "#1C2433"
+KRAFT = "#E3C7A4"
+TAPE = "#D9BC8F"
+SURFACE_Y = 1105          # quota d'appoggio degli oggetti sul piano
 
 slides = []
 
@@ -36,14 +50,6 @@ slides = []
 # ==========================================================================
 # Illustrazioni
 # ==========================================================================
-
-def planted_flag(x, top, h):
-    """Bandierina piantata nella carta kraft, con ombra alla base."""
-    base = top + h
-    shadow = f'<ellipse cx="{x + 10 * h / 100:.1f}" cy="{base - 2:.1f}" rx="{h * 0.13:.1f}" ' \
-             f'ry="{h * 0.028:.1f}" fill="#6B4E30" opacity="0.30"/>'
-    return shadow + place(red_flag(h), x, top)
-
 
 def printer():
     """Multifunzione da ufficio, due cassetti. Box locale 640 x 600."""
@@ -195,8 +201,8 @@ def door():
     o += rect(18, 18, 20, 942, "#000000", extra=' opacity="0.10"')
     o += rect(18, 884, 294, 58, SOFT, extra=' opacity="0.85"')           # battiscopa metallico
     # maniglia
-    o += circle(60, 650, 17, SOFT) + rect(52, 640, 92, 18, "#EEF1F5", rx=9)
-    o += rect(52, 650, 92, 8, STEEL, rx=4)
+    o += circle(60, 690, 17, SOFT) + rect(52, 680, 92, 18, "#EEF1F5", rx=9)
+    o += rect(52, 690, 92, 8, STEEL, rx=4)
     # targhetta
     o += rect(105, 36, 120, 44, CARD_DARK, rx=8) + place(meeting_icon(), 135, 41)
     # foglio A4 con nastro adesivo
@@ -207,126 +213,262 @@ def door():
     return o
 
 
-def hdmi_plug():
-    """Spina HDMI con cavo e segni di 'contatto che va e viene'. Box locale ~ 360 x 130."""
-    o = path("M150,62 C220,60 270,80 360,70", "none", stroke(CARD_DARK, 26))
-    o += rect(70, 28, 110, 70, CARD_DARK, rx=12) + rect(78, 36, 94, 10, "#2A3B5E", rx=5)
-    o += path("M8,38 H74 V90 H26 L8,74 Z", "#C9D0DC")
-    o += path("M18,48 H64 V78 H30 L18,68 Z", "#6B7890")
-    for i, (a, l) in enumerate(((-150, 24), (180, 28), (150, 24))):
+def desk_flag(h=440):
+    """La 🚩 come bandierina da scrivania: base metallica, asta, drappo. Origine = centro base."""
+    o = f'<ellipse cx="0" cy="0" rx="{h * 0.2:.1f}" ry="{h * 0.05:.1f}" fill="#8A93A6"/>'
+    o += f'<ellipse cx="0" cy="{-h * 0.018:.1f}" rx="{h * 0.2:.1f}" ry="{h * 0.045:.1f}" fill="#D5DCE8"/>'
+    o += f'<ellipse cx="0" cy="{-h * 0.024:.1f}" rx="{h * 0.07:.1f}" ry="{h * 0.017:.1f}" fill="#AEB6C4"/>'
+    o += place(red_flag(h), -0.102 * h, -h * 1.0)
+    return o
+
+
+def office_chair():
+    """Sedia da ufficio consumata: nastro kraft sullo schienale, imbottitura strappata. Box 420 x 640."""
+    o = ""
+    # base a cinque razze con ruote
+    for (x2, y2) in ((34, 606), (386, 606), (104, 628), (316, 628)):
+        o += path(f"M210,586 L{x2},{y2}", "none", stroke(FABRIC_DARK, 20))
+    for (x2, y2) in ((34, 606), (386, 606), (104, 628), (316, 628)):
+        o += circle(x2, y2 + 10, 16, "#0A1428") + circle(x2 - 4, y2 + 6, 5, "#3B4862")
+    o += circle(210, 586, 20, FABRIC_DARK)
+    # pistone
+    o += rect(198, 452, 24, 140, "#AEB6C4") + rect(210, 452, 12, 140, "#8A93A6")
+    o += rect(150, 432, 120, 30, FABRIC_DARK, rx=10)
+    # braccioli
+    for x in (40, 348):
+        o += rect(x + 22, 330, 18, 104, FABRIC_DARK, rx=6)
+        o += rect(x, 316, 72, 24, FABRIC_DARK, rx=12)
+    # schienale e supporto
+    o += rect(193, 330, 34, 80, FABRIC_DARK, rx=6)
+    o += rect(88, 30, 244, 324, FABRIC, rx=64)
+    o += rect(108, 50, 204, 284, FABRIC_LIGHT, rx=52)
+    o += path("M126,190 C170,204 250,204 294,190", "none", stroke(FABRIC, 4, ' opacity="0.7"'))
+    # nastro kraft a X sullo strappo
+    o += place(rect(-66, -14, 132, 28, TAPE, extra=' opacity="0.95"'), 222, 128, rotate=-32)
+    o += place(rect(-66, -14, 132, 28, TAPE, extra=' opacity="0.95"'), 222, 128, rotate=30)
+    # seduta
+    o += f'<ellipse cx="210" cy="428" rx="176" ry="34" fill="{FABRIC_DARK}"/>'
+    o += f'<ellipse cx="210" cy="410" rx="176" ry="40" fill="{FABRIC_LIGHT}"/>'
+    o += path("M126,404 L146,392 L160,408 L182,394 L196,410 L176,420 L150,416 Z", "#EFE3C8")
+    return o
+
+
+def squeak(x, y, side=1, color=WHITE):
+    """Segni di scricchiolio: tre trattini a ventaglio (side=-1 verso sinistra)."""
+    o = ""
+    for a in (-32, 0, 32):
         r = math.radians(a)
-        x0, y0 = 2 + 16 * math.cos(r), 64 + 26 * math.sin(r)
-        o += path(f"M{x0:.1f},{y0:.1f} L{x0 + l * math.cos(r):.1f},{y0 + l * math.sin(r):.1f}",
-                  "none", stroke(WHITE, 5))
+        x0, y0 = x + side * 12 * math.cos(r), y + 12 * math.sin(r)
+        x1, y1 = x + side * 44 * math.cos(r), y + 44 * math.sin(r)
+        o += path(f"M{x0:.1f},{y0:.1f} L{x1:.1f},{y1:.1f}", "none", stroke(color, 7))
     return o
 
 
-def comment_bar():
-    """Campo commento finto: avatar, bandierina 'digitata', cursore, invio. Box 900 x 120."""
-    o = rect(4, 8, 900, 120, "#000000", rx=60, extra=' opacity="0.25"')
-    o += rect(0, 0, 900, 120, WHITE, rx=60)
-    o += circle(66, 60, 38, SOFT)
-    o += circle(66, 50, 13, NAVY) + path("M44,86 C46,66 86,66 88,86 Z", NAVY)
-    o += place(red_flag(70), 122, 25)
-    o += rect(200, 32, 5, 56, RED, rx=2.5)
-    # invio (aeroplanino)
-    o += path("M800,40 L860,60 L800,80 L810,60 Z", NAVY)
-    o += path("M810,60 L842,60", "none", stroke(WHITE, 3))
+def laptop():
+    """Portatile aperto con immagine che sfarfalla. Origine: angolo alto sinistro dello schermo."""
+    o = rect(0, 0, 440, 286, CARD_DARK, rx=16) + rect(16, 16, 408, 246, CARD_LIGHT, rx=6)
+    o += circle(220, 8, 3, "#3B4862")
+    for (x, y, w, h, c, op) in ((16, 58, 408, 20, RED, .7), (70, 104, 354, 10, WHITE, .35),
+                                (16, 140, 290, 28, "#3C64B4", .75), (140, 196, 284, 12, RED, .5),
+                                (16, 224, 180, 8, WHITE, .3)):
+        o += rect(x, y, w, h, c, extra=f' opacity="{op}"')
+    o += path("M-40,286 H480 L512,312 H-72 Z", "#D5DCE8")
+    o += path("M-72,312 H512 V320 Q512,326 506,326 H-66 Q-72,326 -72,320 Z", "#AEB6C4")
+    o += rect(180, 314, 80, 5, "#8A93A6", rx=2.5)
     return o
+
+
+def hand_with_plug():
+    """
+    Mano che tiene fermo lo spinotto HDMI nella porta. Origine: punta dello spinotto.
+    Il braccio entra da sinistra.
+    """
+    o = path("M-120,16 C-180,16 -230,40 -300,44 C-360,48 -420,40 -520,46", "none",
+             stroke(CARD_DARK, 12))                                                  # cavo
+    o += rect(-30, -8, 30, 16, "#C9D0DC") + rect(-24, -3, 20, 6, "#6B7890", rx=1)    # punta metallica
+    o += rect(-106, -16, 78, 32, CARD_DARK, rx=6)                                   # corpo spinotto
+    # braccio e polsino
+    o += path("M-560,-86 L-250,-66 L-250,26 L-560,50 Z", FABRIC_LIGHT)
+    o += rect(-262, -70, 24, 98, WHITE, rx=6)
+    # mano: dorso, dita chiuse sotto, pollice sopra lo spinotto
+    o += path("M-240,-60 C-200,-78 -150,-74 -118,-52 C-104,-40 -100,-20 -102,-6 "
+              "L-104,30 C-130,46 -196,48 -240,20 Z", SKIN)
+    o += path("M-150,-2 C-132,-6 -110,0 -100,14 C-98,30 -110,42 -128,44 C-150,46 -160,30 -156,14 Z",
+              SKIN_DARK, ' opacity="0.55"')
+    for y in (8, 22, 36):
+        o += path(f"M-178,{y} C-160,{y + 4} -140,{y + 4} -120,{y - 2}", "none", stroke(SKIN_DARK, 3))
+    o += path("M-196,-58 C-160,-52 -110,-40 -80,-24 C-74,-18 -80,-10 -90,-10 "
+              "C-120,-14 -160,-22 -200,-30 Z", SKIN)
+    o += path("M-96,-22 C-88,-20 -84,-16 -86,-12", "none", stroke(SKIN_DARK, 3))
+    return o
+
+
+def phone():
+    """Smartphone sul supporto con un commento in scrittura: 🚩 e cursore. Box 220 x 462."""
+    o = path("M-6,432 H226 L212,462 H8 Z", "#AEB6C4")
+    o += rect(0, 0, 220, 440, CARD_DARK, rx=30) + rect(9, 9, 202, 422, WHITE, rx=23)
+    o += rect(84, 18, 52, 12, CARD_DARK, rx=6)
+    # anteprima del post: la copertina del carosello
+    o += rect(22, 42, 176, 176, NAVY, rx=10)
+    o += rect(38, 64, 96, 18, RED, rx=2) + rect(38, 90, 120, 12, WHITE, rx=2, extra=' opacity="0.85"')
+    o += rect(38, 108, 104, 12, WHITE, rx=2, extra=' opacity="0.85"')
+    o += place(desk_flag(70), 126, 204)
+    # icone azione
+    o += path("M34,246 C28,238 36,230 42,236 C48,230 56,238 50,246 L42,254 Z", RED)
+    o += circle(76, 244, 9, "none", stroke(NAVY, 3)) + path("M70,252 L66,258 L74,253", "none", stroke(NAVY, 3))
+    # commenti
+    for i, w in enumerate((120, 90)):
+        y = 282 + i * 40
+        o += circle(34, y, 11, SOFT) + rect(52, y - 10, w, 8, "#C9D0DC", rx=4)
+        o += rect(52, y + 4, w - 36, 7, "#E1E6EE", rx=3.5)
+    # campo commento
+    o += rect(20, 372, 180, 44, "#F3F5F9", rx=22, extra=f' stroke="{SOFT}" stroke-width="2"')
+    o += place(red_flag(30), 34, 380) + rect(72, 382, 3.5, 24, RED, rx=1.5)
+    o += path("M168,386 L186,394 L168,402 L172,394 Z", NAVY)
+    return o
+
+
+def notebooks():
+    """Due quaderni impilati con una penna. Origine: angolo basso sinistro sul piano."""
+    o = rect(0, -28, 250, 28, NAVY, rx=4) + rect(8, -21, 234, 6, WHITE, rx=2, extra=' opacity="0.9"')
+    o += rect(22, -52, 206, 24, RED, rx=4) + rect(30, -45, 190, 5, WHITE, rx=2, extra=' opacity="0.9"')
+    o += rect(46, -62, 150, 10, CARD_DARK, rx=5) + path("M196,-62 L214,-57 L196,-52 Z", STEEL)
+    return o
+
+
+def mug():
+    """Tazza bianca con fascia rossa e vapore. Origine: centro della base sul piano."""
+    o = path("M34,-78 C66,-78 66,-30 34,-30", "none", stroke(WHITE, 12))
+    o += rect(-42, -100, 84, 100, WHITE, rx=12) + rect(-42, -64, 84, 18, RED)
+    o += rect(-42, -100, 84, 10, "#D5DCE8", rx=5)
+    for x in (-14, 10):
+        o += path(f"M{x},-116 C{x - 12},-132 {x + 12},-146 {x},-164", "none",
+                  stroke(WHITE, 5, ' opacity="0.55"'))
+    return o
+
+
+def down_arrow_icon(x, y, size, color=RED):
+    """👇 ridisegnata: freccia in giu' dentro un cerchio."""
+    s = size / 100
+    body = (circle(50, 50, 46, color)
+            + path("M50,24 V74 M30,54 L50,74 L70,54", "none", stroke(WHITE, 11)))
+    return group(body, transform=f"translate({x:.1f} {y:.1f}) scale({s:.4f})")
 
 
 # ==========================================================================
 # Slide
 # ==========================================================================
 
+def scene(sid, idx=None):
+    """Parete navy sfocata + (eventuale) paginazione a bandierine."""
+    out = background(sid, "bg_scene.jpg")
+    if idx:
+        out += flag_progress(sid, idx)
+    return out
+
+
 # 01 · COVER --------------------------------------------------------------------
 sid = "slide-01"
-out = background(sid, "bg_cover.jpg")
-out += logo(sid, W / 2, 130, 460)
-t, _ = paragraph(sid, "titolo", 108, 330,
-                 ["==Red flag==", "in ufficio che", "ignori ==da mesi.=="], 112, "semi", lh=1.16)
-out += group(t, gid=f"{sid}-testi")
-flags = ""
-for x, top, h in ((80, 970, 180), (240, 925, 290), (830, 1050, 150), (545, 810, 480), (420, 1120, 140)):
-    flags += planted_flag(x, top, h)
-out += group(flags, gid=f"{sid}-bandierine")
+out = scene(sid) + logo(sid, W / 2, 130, 460)
+out += desk(sid)
+out += blob(sid, 600, 900, 250, 235, KRAFT, seed=4)
+out += soft_shadow(sid, 610, SURFACE_Y + 6, 150, 26)
+out += group(place(desk_flag(440), 600, SURFACE_Y), gid=f"{sid}-bandierina")
+bub, _ = speech_bubble(sid, M, 270, CW, ["**Red flag** in ufficio", "che ignori da mesi."], [],
+                       tip=(610, 612), at=560, title_size=84, flag=False)
+out += bub
 slides.append(slide(sid, out))
 
-# 02 · LA SEDIA (testo + foto, freccia) --------------------------------------------
+# 02 · LA SEDIA ------------------------------------------------------------------
 sid = "slide-02"
-out = background(sid) + flag_progress(sid, 1)
-t, bottom = paragraph(sid, "testo", M, 230,
-                      ["La sedia che", "scricchiola «da un po’»", "==(da marzo).=="], 72, "semi")
-out += group(t, gid=f"{sid}-testi")
-out += hand_arrow(sid, (600, 440), (830, 390), (1010, 540), (885, 640))
-out += photo_slot(sid, M, 570, 760, 600, "FOTO · la sedia che scricchiola")
+out = scene(sid, 1) + desk(sid)
+out += blob(sid, 735, 1010, 300, 320, RED, seed=7)
+out += soft_shadow(sid, 735, 1336, 230, 22, 0.5)
+ch = place(office_chair(), 525, 690)
+ch += place(squeak(0, 0, -1), 525 + 44, 690 + 440) + place(squeak(0, 0, 1), 525 + 376, 690 + 440)
+out += group(ch, gid=f"{sid}-sedia")
+bub, _ = speech_bubble(sid, M, 230, 640, ["La sedia"],
+                       ["che scricchiola «da un po’»", "**(da marzo).**"], tip=(640, 588), at=580)
+out += bub
 slides.append(slide(sid, out))
 
-# 03 · IL POST-IT (testo + illustrazione centrata) ------------------------------------
+# 03 · IL POST-IT ------------------------------------------------------------------
 sid = "slide-03"
-out = background(sid) + flag_progress(sid, 2)
-t, bottom = paragraph(sid, "testo", M, 230,
-                      ["Il post-it sulla", "stampante: ==«NON usare==", "==il cassetto 2».=="],
-                      72, "semi")
-out += group(t, gid=f"{sid}-testi")
-ill = place(printer(), 220, 580, scale=0.96)
-ill += place(postit(), 548, 930, rotate=-6)
-out += group(ill, gid=f"{sid}-illustrazione")
+out = scene(sid, 2) + desk(sid)
+out += blob(sid, 620, 905, 300, 230, RED, seed=11)
+k = 0.72
+px = 620 - 320 * k
+py = SURFACE_Y + 8 - 586 * k
+out += soft_shadow(sid, 620, SURFACE_Y + 8, 250, 24, 0.45)
+ill = place(printer(), px, py, scale=k)
+ill += place(postit(), px + 328 * k, py + 350 * k, scale=k, rotate=-6)
+out += group(ill, gid=f"{sid}-stampante")
+bub, _ = speech_bubble(sid, M, 230, 650, ["Il post-it sulla", "stampante:"],
+                       ["**«NON usare il cassetto 2».**"], tip=(560, 600), at=500)
+out += bub
 slides.append(slide(sid, out))
 
-# 04 · IL PC (card scura con barra rossa + monitor e orologio) ------------------------
+# 04 · IL PC ---------------------------------------------------------------------
 sid = "slide-04"
-out = background(sid) + flag_progress(sid, 3)
-card_top = 230
-t, bottom = paragraph(sid, "testo", M + 56, card_top + 50,
-                      ["Il PC che ci mette dieci", "minuti ad accendersi,", "==«ma poi va».=="],
-                      64, "semi", max_width=CW - 96)
-card_h = bottom + 48 - card_top
-card = rect(M, card_top, CW, card_h, CARD_DARK, rx=6) + rect(M, card_top, 12, card_h, RED)
-out += group(card, gid=f"{sid}-card") + group(t, gid=f"{sid}-testi")
-ill = place(monitor(), 120, 660)
-ill += place(clock(145), 812, 1010)
-out += group(ill, gid=f"{sid}-illustrazione")
+out = scene(sid, 3) + desk(sid)
+out += place(clock(92), 886, 392)
+out += blob(sid, 560, 905, 310, 230, RED, seed=5)
+k = 0.8
+out += soft_shadow(sid, 560, SURFACE_Y + 4, 230, 22, 0.45)
+out += group(place(monitor(), 560 - 310 * k, SURFACE_Y + 4 - 452 * k, scale=k), gid=f"{sid}-monitor")
+bub, _ = speech_bubble(sid, M, 230, 660, ["Il PC"],
+                       ["che ci mette dieci minuti ad", "accendersi, **«ma poi va».**"],
+                       tip=(520, 600), at=470)
+out += bub
 slides.append(slide(sid, out))
 
-# 05 · LA SALA RIUNIONI (testo a sinistra + porta a destra) ---------------------------
+# 05 · LA SALA RIUNIONI ----------------------------------------------------------------
 sid = "slide-05"
-out = background(sid) + flag_progress(sid, 4)
-t, bottom = paragraph(sid, "testo", M, 497,
-                      ["La sala riunioni", "che si prenota su", "un ==foglio A4==", "==appeso alla porta.=="],
-                      56, "semi", max_width=530)
-out += group(t, gid=f"{sid}-testi")
-out += hand_arrow(sid, (462, 668), (530, 680), (600, 668), (646, 648), head=22)
-out += group(place(door(), 660, 230), gid=f"{sid}-illustrazione")
+out = scene(sid, 4)
+out += blob(sid, 872, 610, 230, 280, RED, seed=9)
+out += group(place(door(), 716, 300, scale=0.92), gid=f"{sid}-porta")
+out += desk(sid)
+out += soft_shadow(sid, 318, SURFACE_Y + 8, 170, 16, 0.4, name="ombra-quaderni")
+out += soft_shadow(sid, 560, SURFACE_Y + 8, 70, 12, 0.4, name="ombra-tazza")
+out += group(place(notebooks(), 190, SURFACE_Y + 8) + place(mug(), 560, SURFACE_Y + 8),
+             gid=f"{sid}-scrivania")
+bub, _ = speech_bubble(sid, M, 470, 560, ["La sala riunioni"],
+                       ["che si prenota su un", "**foglio A4 appeso**", "**alla porta.**"],
+                       tip=(712, 610), side="right", at=580, title_size=52)
+out += bub
 slides.append(slide(sid, out))
 
-# 06 · IL CAVO HDMI (fascia rossa + foto ruotata) --------------------------------------
+# 06 · IL CAVO HDMI -------------------------------------------------------------------
 sid = "slide-06"
-out = background(sid) + flag_progress(sid, 5)
-band_top = 230
-t, bottom = paragraph(sid, "testo", M, band_top + 56,
-                      ["Il cavo HDMI che", "funziona solo se lo", "tieni con la mano."], 70, "semi")
-band_h = bottom + 52 - band_top
-out += group(rect(0, band_top, W, band_h, RED), gid=f"{sid}-fascia") + group(t, gid=f"{sid}-testi")
-ph_top = band_top + band_h + 70
-out += photo_slot(sid, 120, ph_top, 840, 1165 - ph_top - 20, "FOTO · la mano che tiene fermo il cavo HDMI",
-                  rotate=-3)
-out += group(place(hdmi_plug(), 754, ph_top - 69, scale=1.35, rotate=-25), gid=f"{sid}-spina")
+out = scene(sid, 5) + desk(sid)
+out += blob(sid, 610, 915, 330, 220, RED, seed=3)
+lx, ly = 480, SURFACE_Y - 326
+out += soft_shadow(sid, lx + 220, SURFACE_Y + 4, 300, 22, 0.45)
+ill = place(laptop(), lx, ly)
+ill += place(hand_with_plug(), lx - 72, ly + 306)
+ill += place(squeak(0, 0, 1), lx - 88, ly + 306 - 30, rotate=-90)
+out += group(ill, gid=f"{sid}-portatile")
+bub, _ = speech_bubble(sid, M, 230, 670, ["Il cavo HDMI"],
+                       ["che funziona **solo se lo tieni**", "**con la mano.**"], tip=(430, 600), at=390)
+out += bub
 slides.append(slide(sid, out))
 
 # 07 · CTA ------------------------------------------------------------------------
 sid = "slide-07"
-out = background(sid, "bg_contatti.jpg")
-out += logo(sid, W / 2, 130, 400)
-t1, b1 = paragraph(sid, "invito", M, 300, ["Aggiungi la tua", "nei commenti."], 96, "semi", lh=1.16)
-t2, b2 = paragraph(sid, "promessa", M, b1 + 60,
-                   ["==Quella più votata la==", "==risolviamo noi, sul serio.=="], 60, "med", lh=1.22)
-out += group(t1 + t2, gid=f"{sid}-testi")
-bar_top = 930
-out += hand_arrow(sid, (850, b2 - 150), (1010, b2 - 60), (905, b2 + 60), (880, bar_top - 26),
-                  name="freccia-giu")
-out += group(place(comment_bar(), M, bar_top), gid=f"{sid}-commento")
-out += contacts(sid)
+out = scene(sid) + logo(sid, W / 2, 130, 380)
+out += desk(sid)
+out += blob(sid, 700, 890, 250, 240, RED, seed=2)
+k = 0.9
+out += soft_shadow(sid, 700, SURFACE_Y + 6, 150, 20, 0.45)
+out += group(place(phone(), 700 - 110 * k, SURFACE_Y + 6 - 462 * k, scale=k), gid=f"{sid}-telefono")
+bub, bb = speech_bubble(sid, M, 240, 760, ["Aggiungi la tua", "nei commenti."],
+                        ["Quella più votata **la risolviamo**", "**noi, sul serio.**"],
+                        tip=(640, 648), at=600, title_size=62, flag=False)
+out += bub
+# 👇 in coda al testo: seconda riga del corpo, dopo «noi, sul serio.»
+tx = M + 46 + text_width("noi, sul serio.", 42, "semi") + 16
+out += group(down_arrow_icon(tx, bb - 46 - 13 - 34, 40), gid=f"{sid}-emoji")
+out += contacts(sid, y=1226, size=26)
 slides.append(slide(sid, out))
 
 

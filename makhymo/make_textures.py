@@ -4,6 +4,8 @@ Texture raster per i caroselli Makhymo (generate, non fotografiche).
   assets/bg_navy.jpg      carta navy stropicciata, 1080x1350 (fondo di tutte le slide)
   assets/bg_cover.jpg     navy + striscia kraft strappata in basso (copertina)
   assets/bg_contatti.jpg  navy + fascia kraft strappata in basso (CTA finale)
+  assets/bg_scene.jpg     parete navy con luce morbida e pannello caldo sfocato a destra
+                          (fondo delle slide 'a scena': tavolo, oggetto, fumetto)
 
 Le sfaccettature della carta sono una superficie triangolata con altezze casuali,
 illuminata dall'alto a sinistra: e' la stessa geometria di un foglio accartocciato
@@ -116,6 +118,25 @@ def kraft_strip(bg, top_profile, rng, rim=16):
     return bg * (1 - alpha[..., None]) + paper * alpha[..., None]
 
 
+def scene_wall(base, seed=3):
+    """
+    Parete per le slide a scena, come uno sfondo fotografico fuori fuoco:
+    texture ammorbidita, luce morbida da sinistra, pannello kraft molto sfocato a destra.
+    """
+    h, w, _ = base.shape
+    soft = np.stack([gaussian_filter(base[..., c], 2.5 * S) for c in range(3)], -1)
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    light = np.exp(-(((xx - 0.30 * w) / (0.60 * w)) ** 2 + ((yy - 0.38 * h) / (0.50 * h)) ** 2))
+    img = soft * (0.86 + 0.26 * light)[..., None]
+    panel = np.zeros((h, w))
+    panel[: int(0.62 * h), int(0.84 * w):] = 1.0
+    panel = gaussian_filter(panel, 70 * S)
+    panel *= np.clip(1.15 - yy / (0.75 * h), 0, 1)            # sfuma verso il basso
+    warm = np.array([222, 190, 150], float)
+    a = (0.62 * panel / panel.max())[..., None]
+    return img * (1 - a) + warm[None, None, :] * a
+
+
 def _save(arr, name, q=90):
     im = Image.fromarray(np.clip(arr, 0, 255).astype("uint8"))
     im = im.resize((W, H), Image.LANCZOS)
@@ -128,6 +149,7 @@ def main():
     os.makedirs(ASSETS, exist_ok=True)
     base = navy_paper()
     print(_save(base, "bg_navy.jpg"))
+    print(_save(scene_wall(base), "bg_scene.jpg"))
 
     rng = np.random.default_rng(5)
     # copertina: strappo che sale verso destra, come nella cover di riferimento

@@ -378,6 +378,152 @@ def contacts(sid, y=1252, color=KRAFT_INK, size=27):
 
 
 # --------------------------------------------------------------------------
+# Stile 'a scena': oggetto sul tavolo, macchia ondulata dietro, fumetto bianco
+# --------------------------------------------------------------------------
+
+DESK_TOP = 885        # bordo posteriore del piano
+DESK_FRONT = 1180     # spigolo anteriore del piano
+DESK_FACE = 1250      # fondo del bordo frontale
+DESK_CORNER = 70      # x dello spigolo anteriore sinistro del tavolo
+
+
+def rich_text(sid, name, x, baseline, lines, size, lh=1.35, role="reg", fill=NAVY,
+              em_role="semi", em_fill=RED, max_width=CW):
+    """
+    Paragrafo con enfasi: **testo** = em_role / em_fill. Un solo <text>, una <tspan> per riga.
+    Ritorna (svg, baseline_ultima_riga).
+    """
+    step = size * lh
+    tspans = []
+    for i, line in enumerate(lines):
+        runs = []
+        on = False
+        for part in line.split("**"):
+            if part:
+                runs.append((part, on))
+            on = not on
+        lw = sum(text_width(t, size, em_role if e else role) for t, e in runs)
+        assert lw <= max_width + 0.5, f"riga troppo lunga ({lw:.0f} > {max_width:.0f}): {line!r}"
+        inner = ""
+        for t, e in runs:
+            if e:
+                inner += f'<tspan {_font_attrs(em_role)} fill="{em_fill}">{escape(t)}</tspan>'
+            else:
+                inner += escape(t)
+        tspans.append(f'<tspan x="{x:.1f}" y="{baseline + i * step:.1f}">{inner}</tspan>')
+    svg = (f'<text id="{sid}-{name}" font-size="{size}" {_font_attrs(role)} fill="{fill}">'
+           + "".join(tspans) + "</text>")
+    return svg, baseline + (len(lines) - 1) * step
+
+
+def bubble_path(x, y, w, h, tip, side="bottom", at=None, r=30, half=28):
+    """Fumetto: rettangolo arrotondato con la punta verso `tip`, sul lato basso o destro."""
+    tx, ty = tip
+    if side == "bottom":
+        bx = at if at is not None else x + w * 0.7
+        return (f"M{x + r},{y} H{x + w - r} A{r},{r} 0 0 1 {x + w},{y + r} V{y + h - r} "
+                f"A{r},{r} 0 0 1 {x + w - r},{y + h} H{bx + half} L{tx},{ty} L{bx - half},{y + h} "
+                f"H{x + r} A{r},{r} 0 0 1 {x},{y + h - r} V{y + r} A{r},{r} 0 0 1 {x + r},{y} Z")
+    by = at if at is not None else y + h * 0.5
+    return (f"M{x + r},{y} H{x + w - r} A{r},{r} 0 0 1 {x + w},{y + r} V{by - half} "
+            f"L{tx},{ty} L{x + w},{by + half} V{y + h - r} A{r},{r} 0 0 1 {x + w - r},{y + h} "
+            f"H{x + r} A{r},{r} 0 0 1 {x},{y + h - r} V{y + r} A{r},{r} 0 0 1 {x + r},{y} Z")
+
+
+def speech_bubble(sid, x, y, w, title_lines, body_lines, tip, side="bottom", at=None,
+                  title_size=56, body_size=42, pad=46, flag=True):
+    """
+    Fumetto bianco come nei post di riferimento: titolo in grassetto, testo sotto,
+    parti chiave in rosso. flag=True mette la bandierina 🚩 davanti al titolo.
+    Ritorna (svg, bottom).
+    """
+    inner_w = w - 2 * pad
+    fx = x + pad
+    title_x = fx + (title_size * 0.95 if flag else 0)
+    b1 = y + pad + 0.74 * title_size
+    t_svg, t_last = rich_text(sid, "titolo", title_x, b1, title_lines, title_size, lh=1.18,
+                              role="semi", max_width=inner_w - (title_x - fx))
+    body_svg = ""
+    last = t_last
+    if body_lines:
+        bb = t_last + 0.42 * title_size + 0.95 * body_size
+        body_svg, last = rich_text(sid, "testo", fx, bb, body_lines, body_size, lh=1.36,
+                                   max_width=inner_w)
+        bottom_pad = 0.30 * body_size
+    else:
+        bottom_pad = 0.26 * title_size
+    h = last + bottom_pad + pad - y
+    d = bubble_path(x, y, w, h, tip, side, at)
+    icon = ""
+    if flag:
+        fh = title_size * 1.02
+        icon = place(red_flag(fh, pole=STEEL, pole_shade="#8A93A6"), fx - 0.07 * fh,
+                     b1 - 0.86 * title_size)
+    svg = group(f'<path d="{d}" fill="#000000" opacity="0.18" transform="translate(0 10)"/>'
+                f'<path id="{sid}-fumetto-forma" d="{d}" fill="{WHITE}"/>'
+                + icon + t_svg + body_svg, gid=f"{sid}-fumetto")
+    return svg, y + h
+
+
+def blob(sid, cx, cy, rx, ry, fill=RED, waves=9, amp=0.055, seed=1, name="macchia"):
+    """Macchia dal bordo ondulato dietro l'oggetto (come la forma lilla del riferimento)."""
+    import random
+    rnd = random.Random(seed)
+    ph1, ph2 = rnd.uniform(0, 6.28), rnd.uniform(0, 6.28)
+    n = 96
+    pts = []
+    for i in range(n):
+        t = 2 * math.pi * i / n
+        k = 1 + amp * math.sin(waves * t + ph1) + 0.05 * math.sin(2 * t + ph2)
+        pts.append((cx + rx * k * math.cos(t), cy + ry * k * math.sin(t)))
+    # Catmull-Rom chiusa -> Bezier cubiche
+    d = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}"
+    for i in range(n):
+        p0, p1, p2, p3 = pts[i - 1], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        d += f" C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}"
+    return group(path(d + " Z", fill), gid=f"{sid}-{name}")
+
+
+def soft_shadow(sid, cx, cy, rx, ry, opacity=0.35, name="ombra"):
+    """Ombra di contatto morbida (gradiente radiale, niente filtri)."""
+    gid = f"{sid}-{name}-grad"
+    return group(f'<defs><radialGradient id="{gid}" cx="0.5" cy="0.5" r="0.5">'
+                 f'<stop offset="0" stop-color="#0A1428" stop-opacity="{opacity}"/>'
+                 f'<stop offset="0.6" stop-color="#0A1428" stop-opacity="{opacity * 0.45:.3f}"/>'
+                 f'<stop offset="1" stop-color="#0A1428" stop-opacity="0"/></radialGradient></defs>'
+                 f'<ellipse cx="{cx:.1f}" cy="{cy:.1f}" rx="{rx:.1f}" ry="{ry:.1f}" fill="url(#{gid})"/>',
+                 gid=f"{sid}-{name}")
+
+
+def desk(sid, corner=DESK_CORNER):
+    """Tavolo bianco visto leggermente dall'alto, spigolo sinistro in vista, pavimento scuro sotto."""
+    g = f"{sid}-tavolo"
+    back_x = corner + 80
+    defs = (f'<defs>'
+            f'<linearGradient id="{g}-piano" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="#DDE3EB"/><stop offset="0.35" stop-color="#EEF2F6"/>'
+            f'<stop offset="1" stop-color="#FAFBFD"/></linearGradient>'
+            f'<linearGradient id="{g}-bordo" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="#D6DCE5"/><stop offset="1" stop-color="#B9C1CD"/></linearGradient>'
+            f'<linearGradient id="{g}-sotto" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="#050C1A"/><stop offset="1" stop-color="#0C1A36"/></linearGradient>'
+            f'<linearGradient id="{g}-ao" x1="0" y1="0" x2="0" y2="1">'
+            f'<stop offset="0" stop-color="#050C1A" stop-opacity="0"/>'
+            f'<stop offset="1" stop-color="#050C1A" stop-opacity="0.45"/></linearGradient>'
+            f'</defs>')
+    body = (rect(0, DESK_TOP - 26, W, 26, f"url(#{g}-ao)")                         # ombra sul muro
+            + rect(0, DESK_FRONT - 10, W, H - DESK_FRONT + 10, f"url(#{g}-sotto)")  # pavimento
+            + path(f"M{back_x},{DESK_TOP} H{W} V{DESK_FRONT} H{corner} Z", f"url(#{g}-piano)")
+            + rect(corner, DESK_FRONT, W - corner, DESK_FACE - DESK_FRONT, f"url(#{g}-bordo)")
+            + rect(corner, DESK_FRONT - 2, W - corner, 3, WHITE, extra=' opacity="0.9"')
+            + path(f"M{corner},{DESK_FACE} H{W} V{DESK_FACE + 26} H{corner + 20} Z", "#000000",
+                   ' opacity="0.35"'))
+    return group(defs + body, gid=g)
+
+
+# --------------------------------------------------------------------------
 # Assemblaggio e consegna
 # --------------------------------------------------------------------------
 
