@@ -16,7 +16,10 @@ Testo del cliente, impaginato senza modifiche (una red flag per slide):
   🚩 Il PC che ci mette dieci minuti ad accendersi, «ma poi va».
   🚩 La sala riunioni che si prenota su un foglio A4 appeso alla porta.
   🚩 Il cavo HDMI che funziona solo se lo tieni con la mano.
-  Aggiungi la tua nei commenti. Quella più votata la risolviamo noi, sul serio. 👇
+  CTA (riscritta su richiesta, sostituisce «Aggiungi la tua nei commenti. Quella più
+  votata la risolviamo noi, sul serio. 👇»):
+  E nel tuo ufficio? Scrivi nei commenti la red flag che tutti fingono di non vedere.
+  La più votata la sistemiamo noi. 👇
 
 Nel fumetto il soggetto fa da titolo e il resto della frase da testo: la frase resta identica.
 Le emoji sono ridisegnate come vettori (🚩 bandierina, 👇 freccia).
@@ -108,12 +111,13 @@ slides.append(slide(sid, out))
 # 07 · CTA ------------------------------------------------------------------------
 sid = "slide-07"
 out = photo_slide(sid, "07_cta.jpg") + logo(sid, W / 2, 130, 380)
-bub, bb = speech_bubble(sid, M, 240, 760, ["Aggiungi la tua", "nei commenti."],
-                        ["Quella più votata **la risolviamo**", "**noi, sul serio.**"],
-                        tip=(590, 700), at=560, title_size=62, flag=False)
+bub, bb = speech_bubble(sid, M, 240, 730, ["E nel tuo ufficio?"],
+                        ["Scrivi nei commenti la red flag", "che tutti fingono di non vedere.",
+                         "**La più votata**", "**la sistemiamo noi.**"],
+                        tip=(600, 730), at=560, title_size=66, flag=False)
 out += bub
-# 👇 in coda al testo: seconda riga del corpo, dopo «noi, sul serio.»
-tx = M + 46 + text_width("noi, sul serio.", 42, "semi") + 16
+# 👇 in coda al testo, dopo «la sistemiamo noi.»
+tx = M + 46 + text_width("la sistemiamo noi.", 42, "semi") + 16
 out += group(down_arrow_icon(tx, bb - 46 - 13 - 34, 40), gid=f"{sid}-emoji")
 out += contacts(sid, y=1290, size=26)
 slides.append(slide(sid, out))
