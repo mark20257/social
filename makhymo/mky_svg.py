@@ -225,6 +225,30 @@ def _data_uri(name):
     return _img[name]
 
 
+def photo_background(sid, rel_path, max_side=1800, quality=88):
+    """
+    Foto a tutta pagina (4:5), ritagliata al centro e incorporata come JPEG.
+    rel_path e' relativo ad assets/. Gruppo '<sid>-foto': in Illustrator si sostituisce con Collega/Incorpora.
+    """
+    import io
+    from PIL import Image
+    im = Image.open(os.path.join(ASSETS, rel_path)).convert("RGB")
+    r = max(W / im.width, H / im.height)
+    cw, ch = W / r, H / r
+    left, top = (im.width - cw) / 2, (im.height - ch) / 2
+    im = im.crop((round(left), round(top), round(left + cw), round(top + ch)))
+    if max(im.size) > max_side:
+        k = max_side / max(im.size)
+        im = im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
+    data = base64.b64encode(buf.getvalue()).decode()
+    return group(rect(0, 0, W, H, NAVY)
+                 + f'<image x="0" y="0" width="{W}" height="{H}" preserveAspectRatio="xMidYMid slice" '
+                   f'xlink:href="data:image/jpeg;base64,{data}"/>',
+                 gid=f"{sid}-foto")
+
+
 def background(sid, name="bg_navy.jpg"):
     return group(rect(0, 0, W, H, NAVY)
                  + f'<image x="0" y="0" width="{W}" height="{H}" preserveAspectRatio="none" '
