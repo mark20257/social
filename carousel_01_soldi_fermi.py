@@ -144,7 +144,8 @@ slides.append(build_layout_cta(
     question="Hai mai provato\na dare una data\nai tuoi risparmi?",
     contacts=[(icon_phone, "0141 557260"),
               (icon_mail, "asti4@ageallianz.it"),
-              (icon_pin, "Via Alcide De Gasperi 2, Asti")],
+              (icon_pin, "Via Alcide De Gasperi 2, Asti"),
+              (icon_web, "www.agenziamadonia.it")],
     illu_fn=illu_calendar_savings,
 ))
 

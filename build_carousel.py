@@ -455,6 +455,14 @@ def icon_pin(x, y, size, c=WHITE, bg=NAVY, gid=None):
         + circle(50, 38, 13, bg), x, y, size, gid)
 
 
+def icon_web(x, y, size, c=WHITE, bg=NAVY, gid=None):
+    """Globo stilizzato: sito web."""
+    return _icon(
+        circle(50, 50, 44, c) + circle(50, 50, 36, bg)
+        + f'<ellipse cx="50" cy="50" rx="15" ry="36" fill="none" stroke="{c}" stroke-width="7"/>'
+        + rect(14, 46, 72, 8, c) + rect(46, 14, 8, 72, c), x, y, size, gid)
+
+
 def icon_eye_off(x, y, size, c=WHITE, bg=NAVY, gid=None):
     return _icon(
         f'<path d="M6 50 Q50 6 94 50 Q50 94 6 50 Z" fill="{c}"/>'
