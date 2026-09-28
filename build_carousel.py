@@ -636,6 +636,33 @@ def _slide(sid, content):
     return group(content, gid=sid)
 
 
+def _cover_photo_path(photo):
+    """Percorso della foto di copertina (assets/covers/) se esiste."""
+    if not photo:
+        return None
+    p = photo if os.path.isabs(photo) else os.path.join(ASSETS, "covers", photo)
+    return p if os.path.exists(p) else None
+
+
+def _photo_image(sid, path):
+    """Foto a piena pagina, ritagliata 1080x1350 e incorporata (JPEG base64)."""
+    import base64
+    import io
+    from PIL import Image
+    im = Image.open(path).convert("RGB")
+    # ritaglio centrato al formato 4:5 e ridimensionamento a 2x per la stampa del PDF
+    tw, th = W * 2, H * 2
+    r = max(tw / im.width, th / im.height)
+    im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+    left, top = (im.width - tw) // 2, (im.height - th) // 2
+    im = im.crop((left, top, left + tw, top + th))
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=88, optimize=True)
+    data = base64.b64encode(buf.getvalue()).decode()
+    return group(f'<image x="0" y="0" width="{W}" height="{H}" preserveAspectRatio="xMidYMid slice" '
+                 f'xlink:href="data:image/jpeg;base64,{data}"/>', gid=f"{sid}-foto")
+
+
 def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo=None):
     """Cover: illustrazione piena pagina, gradiente dal basso, testi in basso a sinistra, logo centrato."""
     logo_h = 170
@@ -648,12 +675,17 @@ def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo
     tit_y = sub_y - sub_size * 0.72 - 36 - tit_h + title_size * 0.72
     eb_y = tit_y - title_size * 0.72 - 44
 
-    photo_layer = illustration_svg
+    photo_path = _cover_photo_path(photo)
+    if photo_path:
+        photo_layer = _photo_image(sid, photo_path)
+        # sul fotografico serve un gradiente piu' pieno per la leggibilita'
+        stops = ((0, 0.35), (0.22, 0), (0.42, 0.10), (0.60, 0.82), (0.74, 0.96), (1, 1))
+    else:
+        photo_layer = illustration_svg
+        stops = ((0, 0), (0.40, 0), (0.66, 0.88), (1, 1))
     grad = (f'<defs><linearGradient id="{sid}-cover" x1="0" y1="0" x2="0" y2="1">'
-            f'<stop offset="0" stop-color="{NAVY_DEEP}" stop-opacity="0"/>'
-            f'<stop offset="0.40" stop-color="{NAVY_DEEP}" stop-opacity="0"/>'
-            f'<stop offset="0.66" stop-color="{NAVY_DEEP}" stop-opacity="0.88"/>'
-            f'<stop offset="1" stop-color="{NAVY_DEEP}" stop-opacity="1"/></linearGradient></defs>'
+            + "".join(f'<stop offset="{o}" stop-color="{NAVY_DEEP}" stop-opacity="{a}"/>' for o, a in stops)
+            + '</linearGradient></defs>'
             + rect(0, 0, W, H, f"url(#{sid}-cover)"))
     t_svg, _, _ = text_block(M, tit_y, title, title_size, 700, WHITE, CW, 1.12, tid=f"{sid}-titolo")
     s_svg, _, _ = text_block(M, sub_y, subtitle, sub_size, 400, SOFT, CW, 1.3, tid=f"{sid}-sottotitolo")

@@ -42,6 +42,7 @@ slides.append(build_cover_photo(
     "Lasciare i soldi fermi è davvero la scelta più prudente?",
     "Il rischio che non si vede: ==l’inflazione.==",
     illu_piggy_dissolve("slide-01", 118, 140, scale=1.22),
+    photo="Madonia_Cover_SoldiFermi.jpg",   # assets/covers/; se manca resta l'illustrazione
 ))
 
 # 02 · VERSUS: quello che vedi e quello che non vedi -------------------------
