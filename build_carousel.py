@@ -343,8 +343,12 @@ def eyebrow(sid, text, x=M, y=None, style="pill"):
                      + svg_text(x + 24, y, text, 30, 700, AZURE, spacing=3),
                      gid=f"{sid}-occhiello")
     h = 66
-    cy = 116                                   # centro verticale del logo in alto a destra
-    max_w = W - M - 120 * logo_ratio() - 44 - x
+    if y is None:
+        cy = 116                               # centro verticale del logo in alto a destra
+        max_w = W - M - 120 * logo_ratio() - 44 - x
+    else:
+        cy = y                                 # posizione libera (es. cover, sopra il titolo)
+        max_w = W - M - x
     size, sp = 36, 2.5
     while size > 30 and text_width(text, size, 700, spacing=sp) + 56 > max_w:
         size -= 1
@@ -759,7 +763,7 @@ def _photo_image(sid, path):
                  f'xlink:href="data:image/jpeg;base64,{data}"/>', gid=f"{sid}-foto")
 
 
-def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo=None):
+def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo=None, eyebrow_style="line"):
     """Cover: illustrazione piena pagina, gradiente dal basso, testi in basso a sinistra, logo centrato."""
     logo_h = 170
     logo_y = H - 56 - logo_h
@@ -786,7 +790,8 @@ def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo
     t_svg, _, _ = text_block(M, tit_y, title, title_size, 700, WHITE, CW, 1.12, tid=f"{sid}-titolo")
     s_svg, _, _ = text_block(M, sub_y, subtitle, sub_size, 400, SOFT, CW, 1.3, tid=f"{sid}-sottotitolo")
     return _slide(sid, background(sid, glow=(560, 420)) + photo_layer + group(grad, gid=f"{sid}-gradiente")
-                  + eyebrow(sid, eyebrow_txt, M, eb_y, style="line")
+                  + (eyebrow(sid, eyebrow_txt, M, eb_y, style="line") if eyebrow_style == "line"
+                     else eyebrow(sid, eyebrow_txt, M, eb_y - 24))
                   + group(t_svg + s_svg, gid=f"{sid}-testi")
                   + svg_logo_center(sid, logo_y, logo_h))
 

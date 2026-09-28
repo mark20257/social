@@ -35,6 +35,7 @@ slides.append(build_cover_photo(
     "Te lo raccontiamo ==passo dopo passo.==",
     group(icon_family(300, 170, 480, AZURE_LIGHT, NAVY), gid="slide-01-illustrazione"),
     photo="Madonia_Cover_PrimaConsulenza.jpg",
+    eyebrow_style="pill",
 ))
 
 # 02 · La conversazione --------------------------------------------------------------
