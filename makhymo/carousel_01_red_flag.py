@@ -18,11 +18,10 @@ Testo del cliente, impaginato senza modifiche (una red flag per slide):
   🚩 Il cavo HDMI che funziona solo se lo tieni con la mano.
   CTA (riscritta su richiesta, sostituisce «Aggiungi la tua nei commenti. Quella più
   votata la risolviamo noi, sul serio. 👇»):
-  E nel tuo ufficio? Scrivi nei commenti la red flag che tutti fingono di non vedere.
-  La più votata la sistemiamo noi. 👇
+  Qual è la red flag nel tuo ufficio? Scrivila nei commenti
 
 Nel fumetto il soggetto fa da titolo e il resto della frase da testo: la frase resta identica.
-Le emoji sono ridisegnate come vettori (🚩 bandierina, 👇 freccia).
+La 🚩 e' ridisegnata come vettore (bandierina davanti al titolo).
 Nessun dato statistico: nessuna fonte da citare.
 """
 
@@ -32,14 +31,6 @@ SLUG = "RedFlag"
 PHOTOS = "photos/redflag"
 
 slides = []
-
-
-def down_arrow_icon(x, y, size, color=RED):
-    """👇 ridisegnata: freccia in giu' dentro un cerchio."""
-    s = size / 100
-    body = (circle(50, 50, 46, color)
-            + path("M50,24 V74 M30,54 L50,74 L70,54", "none", stroke(WHITE, 11)))
-    return group(body, transform=f"translate({x:.1f} {y:.1f}) scale({s:.4f})")
 
 
 def shade_top(sid, h=260, opacity=0.45):
@@ -111,14 +102,10 @@ slides.append(slide(sid, out))
 # 07 · CTA ------------------------------------------------------------------------
 sid = "slide-07"
 out = photo_slide(sid, "07_cta.jpg") + logo(sid, W / 2, 130, 380)
-bub, bb = speech_bubble(sid, M, 240, 730, ["E nel tuo ufficio?"],
-                        ["Scrivi nei commenti la red flag", "che tutti fingono di non vedere.",
-                         "**La più votata**", "**la sistemiamo noi.**"],
-                        tip=(600, 730), at=560, title_size=66, flag=False)
+bub, _ = speech_bubble(sid, M, 240, 680, ["Qual è la red flag", "nel tuo ufficio?"],
+                       ["**Scrivila nei commenti**"],
+                       tip=(600, 640), at=560, title_size=66, body_size=44, flag=False)
 out += bub
-# 👇 in coda al testo, dopo «la sistemiamo noi.»
-tx = M + 46 + text_width("la sistemiamo noi.", 42, "semi") + 16
-out += group(down_arrow_icon(tx, bb - 46 - 13 - 34, 40), gid=f"{sid}-emoji")
 out += contacts(sid, y=1290, size=26)
 slides.append(slide(sid, out))
 
