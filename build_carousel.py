@@ -331,9 +331,26 @@ def svg_logo_center(sid, y, height):
     return svg_logo(W / 2, y, height, sid, anchor="middle")
 
 
-def eyebrow(sid, text, x=M, y=112):
-    return group(rect(x, y - 30, 8, 36, AZURE)
-                 + svg_text(x + 24, y, text, 30, 700, AZURE, spacing=3),
+def eyebrow(sid, text, x=M, y=None, style="pill"):
+    """
+    Etichetta in alto a sinistra.
+    pill: pillola azzurra piena con testo bianco, centrata sul logo in alto a destra
+    line: barretta + testo azzurro (occhiello della cover, sopra il titolo)
+    """
+    if style == "line":
+        y = 112 if y is None else y
+        return group(rect(x, y - 30, 8, 36, AZURE)
+                     + svg_text(x + 24, y, text, 30, 700, AZURE, spacing=3),
+                     gid=f"{sid}-occhiello")
+    h = 66
+    cy = 116                                   # centro verticale del logo in alto a destra
+    max_w = W - M - 120 * logo_ratio() - 44 - x
+    size, sp = 36, 2.5
+    while size > 30 and text_width(text, size, 700, spacing=sp) + 56 > max_w:
+        size -= 1
+    tw = text_width(text, size, 700, spacing=sp)
+    return group(rect(x, cy - h / 2, tw + 56, h, AZURE, h / 2)
+                 + svg_text(x + 28, cy + size * 0.36, text, size, 700, WHITE, spacing=sp),
                  gid=f"{sid}-occhiello")
 
 
@@ -769,7 +786,7 @@ def build_cover_photo(sid, eyebrow_txt, title, subtitle, illustration_svg, photo
     t_svg, _, _ = text_block(M, tit_y, title, title_size, 700, WHITE, CW, 1.12, tid=f"{sid}-titolo")
     s_svg, _, _ = text_block(M, sub_y, subtitle, sub_size, 400, SOFT, CW, 1.3, tid=f"{sid}-sottotitolo")
     return _slide(sid, background(sid, glow=(560, 420)) + photo_layer + group(grad, gid=f"{sid}-gradiente")
-                  + eyebrow(sid, eyebrow_txt, M, eb_y)
+                  + eyebrow(sid, eyebrow_txt, M, eb_y, style="line")
                   + group(t_svg + s_svg, gid=f"{sid}-testi")
                   + svg_logo_center(sid, logo_y, logo_h))
 
