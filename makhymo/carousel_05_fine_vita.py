@@ -48,13 +48,15 @@ slides.append(story(
     ring=(900, 330), tape_at=(0.80, 0.10), tape_rot=8, photo_w=640, head_max=84))
 
 # 02 · SI PROVA A RIPARARLA ------------------------------------------------------
+# il numero degli interventi in grande, sopra il titolo
 slides.append(story(
     "slide-02", "red", "ASSISTENZA",
-    ["PRIMA DI TUTTO", "SI PROVA", "==A RIPARARLA.=="],
-    "Se il guasto si ripara, la macchina torna a lavorare e il rifiuto non nasce. "
-    "Nel 2025 i nostri tecnici hanno fatto 4.624 interventi.",
+    ["INTERVENTI TECNICI", "==NEL 2025.=="],
+    "Prima di tutto, i nostri tecnici provano a ripararla. Se il guasto si sistema, la "
+    "macchina torna a lavorare e il rifiuto non nasce.",
     "08_riparazione.png", BIL, ring=(170, 380), tape_at=(0.78, 0.14), tape_rot=-8,
-    photo_w=820))
+    photo_w=760, head_top=372,
+    extra=lambda sb: headline("slide-02-numero", ["==4.624=="], 178, size=200)[0]))
 
 # 03 · I DATI --------------------------------------------------------------------
 slides.append(story(
@@ -69,8 +71,9 @@ slides.append(story(
 slides.append(story(
     "slide-04", "red", "TONER",
     ["==205 KG==", "DI TONER ESAUSTI", "NEL 2025."],
-    "Tanto ne abbiamo gestito l’anno scorso. Il toner viaggia a parte: lo ritira un "
-    "operatore iscritto all’Albo Nazionale Gestori Ambientali.",
+    "Sono le cartucce di toner vuote che abbiamo mandato allo smaltimento in un anno. "
+    "Viaggiano separate dalla stampante: le ritira un’azienda autorizzata, iscritta "
+    "all’Albo Nazionale Gestori Ambientali.",
     "10_toner_esausti.png", BIL, ring=(170, 380), tape_at=(0.80, 0.20), tape_rot=8,
     photo_w=640))
 
