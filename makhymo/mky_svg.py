@@ -55,8 +55,10 @@ FONTS = {
     "med": ("LexendDeca-Medium", "Lexend Deca Medium", "LexendDeca-Medium.ttf"),
     "semi": ("LexendDeca-SemiBold", "Lexend Deca SemiBold", "LexendDeca-SemiBold.ttf"),
     "bold": ("LexendDeca-Bold", "Lexend Deca", "LexendDeca-Bold.ttf"),
+    "xbold": ("LexendDeca-ExtraBold", "Lexend Deca ExtraBold", "LexendDeca-ExtraBold.ttf"),
+    "black": ("LexendDeca-Black", "Lexend Deca Black", "LexendDeca-Black.ttf"),
 }
-FONT_WEIGHT = {"reg": 400, "med": 500, "semi": 600, "bold": 700}
+FONT_WEIGHT = {"reg": 400, "med": 500, "semi": 600, "bold": 700, "xbold": 800, "black": 900}
 
 _pil = {}
 
@@ -582,10 +584,11 @@ def _for_render(svg):
     return svg
 
 
-def deliver(slides, slug, out_dir=None, sheet=True):
+def deliver(slides, slug, out_dir=None, sheet=True, pdf=False):
     """
     Scrive Makhymo_<slug>_ALL_SLIDES.svg e, in Makhymo_<slug>_PNG/, una PNG 1080x1350
     per slide (Makhymo_<slug>_NN.png, pronte per Instagram) + contact_sheet.jpg.
+    pdf=True aggiunge Makhymo_<slug>.pdf multipagina (carosello 'documento' di LinkedIn).
     """
     import io
     import xml.etree.ElementTree as ET
@@ -624,4 +627,19 @@ def deliver(slides, slug, out_dir=None, sheet=True):
             im = Image.open(p).convert("RGB").resize((tw_, th_), Image.LANCZOS)
             cs.paste(im, (16 + (i % cols) * (tw_ + 16), 16 + (i // cols) * (th_ + 16)))
         cs.save(os.path.join(prev_dir, "contact_sheet.jpg"), quality=88)
+
+    if pdf:
+        from pypdf import PdfReader, PdfWriter
+        writer = PdfWriter()
+        for s in slides:
+            doc = _for_render(slide_svg(s)).replace(f'width="{W}" height="{H}"',
+                                                    f'width="{W}pt" height="{H}pt"', 1)
+            buf = io.BytesIO()
+            cairosvg.svg2pdf(bytestring=doc.encode(), write_to=buf)
+            buf.seek(0)
+            for page in PdfReader(buf).pages:
+                writer.add_page(page)
+        writer.add_metadata({"/Title": f"Makhymo {slug}", "/Author": "Makhymo S.r.l."})
+        with open(os.path.join(out_dir, f"Makhymo_{slug}.pdf"), "wb") as f:
+            writer.write(f)
     return svg_path, prev_dir

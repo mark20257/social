@@ -6,6 +6,9 @@ Texture raster per i caroselli Makhymo (generate, non fotografiche).
   assets/bg_contatti.jpg  navy + fascia kraft strappata in basso (CTA finale)
   assets/bg_scene.jpg     parete navy con luce morbida e pannello caldo sfocato a destra
                           (fondo delle slide 'a scena': tavolo, oggetto, fumetto)
+  assets/bg_navy_sticker.jpg / bg_red_sticker.jpg
+                          carta stropicciata piu' marcata, navy e rossa (stile 'sticker')
+  assets/strip_torn.png   striscia di carta grigio chiaro strappata, con trasparenza (1080 x 190)
 
 Le sfaccettature della carta sono una superficie triangolata con altezze casuali,
 illuminata dall'alto a sinistra: e' la stessa geometria di un foglio accartocciato
@@ -25,6 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(HERE, "assets")
 
 NAVY = np.array([18, 37, 73], float)     # #122549
+RED = np.array([198, 24, 61], float)     # #C6183D
 KRAFT = np.array([233, 208, 181], float)
 
 
@@ -53,7 +57,7 @@ def _shade(height, light=(-0.55, -0.7, 0.45)):
     return (nx * lx + ny * ly + nz * lz) / norm
 
 
-def navy_paper(seed=11, w=W * S, h=H * S):
+def navy_paper(seed=11, w=W * S, h=H * S, color=NAVY, strength=0.055, vignette=0.10):
     rng = np.random.default_rng(seed)
     height = (_facets(w, h, 70, 150, rng)           # pieghe grandi
               + _facets(w, h, 260, 38, rng)          # pieghe medie
@@ -64,10 +68,10 @@ def navy_paper(seed=11, w=W * S, h=H * S):
     sh = np.clip(sh, -2.8, 2.8)
     # vignettatura leggera e grana
     yy, xx = np.mgrid[0:h, 0:w]
-    vig = 1 - 0.10 * (((xx / w - 0.5) ** 2 + (yy / h - 0.45) ** 2) / 0.5)
+    vig = 1 - vignette * (((xx / w - 0.5) ** 2 + (yy / h - 0.45) ** 2) / 0.5)
     grain = gaussian_filter(rng.normal(0, 1, (h, w)), 0.8) * 0.6
-    k = 1 + 0.055 * sh + 0.012 * grain
-    img = NAVY[None, None, :] * (k * vig)[..., None]
+    k = 1 + strength * sh + 0.012 * grain
+    img = color[None, None, :] * (k * vig)[..., None]
     return np.clip(img, 0, 255)
 
 
@@ -137,6 +141,46 @@ def scene_wall(base, seed=3):
     return img * (1 - a) + warm[None, None, :] * a
 
 
+def torn_strip(seed=21, w=W * S, h=190 * S, top=40 * S):
+    """Striscia di carta grigio chiaro con bordo superiore strappato, RGBA."""
+    rng = np.random.default_rng(seed)
+    prof = np.full(w, float(top))
+    x = np.arange(w)
+    for f, a in ((1.3, 6), (3.1, 3), (7.7, 1.6)):
+        prof += a * S * np.sin(2 * np.pi * f * x / w + rng.uniform(0, 6.28))
+    for sig, a in ((6, 2.2), (2.0, 1.0)):
+        n = gaussian_filter(rng.normal(0, 1, w), sig * S)
+        prof += a * S * n / (n.std() + 1e-6)
+    grey = np.array([226, 228, 232], float)
+    yy = np.mgrid[0:h, 0:w][0].astype(float)
+    d = yy - prof[None, :]
+    fib = gaussian_filter(rng.normal(0, 1, (h, w)), (1.2 * S, 4 * S))
+    mott = gaussian_filter(rng.normal(0, 1, (h, w)), 10 * S)
+    tone = 1 + 0.015 * fib / (fib.std() + 1e-6) + 0.018 * mott / (mott.std() + 1e-6)
+    paper = grey[None, None, :] * tone[..., None]
+    # fascia chiara dello strappo, sottile e irregolare
+    wv = gaussian_filter(rng.normal(0, 1, w), 10 * S)
+    rimw = 5 * S * (1 + 0.6 * wv / (wv.std() + 1e-6))[None, :]
+    rimw = np.clip(rimw, 1.5 * S, None)
+    fz = gaussian_filter(rng.normal(0, 1, (h, w)), (0.6 * S, 1.6 * S))
+    fz = fz / (fz.std() + 1e-6)
+    edge = np.clip((rimw + 1.2 * S * fz - d) / (1.5 * S), 0, 1) * (d >= 0)
+    white = np.array([251, 251, 250], float)
+    paper = paper * (1 - edge[..., None] * 0.85) + white[None, None, :] * (edge[..., None] * 0.85)
+    inner = np.clip((d - rimw) / (6 * S), 0, 1) * np.clip(1 - (d - rimw) / (30 * S), 0, 1)
+    paper = paper * (1 - 0.05 * inner[..., None])
+    alpha = np.clip((d + 0.8 * S) / (1.6 * S), 0, 1)
+    shadow = np.clip(1 - (-d) / (16 * S), 0, 1) * (d < 0)
+    shadow = gaussian_filter(shadow, 4 * S) * 0.35
+    a = np.clip(alpha + shadow * (1 - alpha), 0, 1)
+    rgb = np.where(a[..., None] > 0, paper * alpha[..., None] / np.maximum(a[..., None], 1e-6), 0)
+    out = np.dstack([np.clip(rgb, 0, 255), a * 255]).astype("uint8")
+    im = Image.fromarray(out, "RGBA").resize((w // S, h // S), Image.LANCZOS)
+    p = os.path.join(ASSETS, "strip_torn.png")
+    im.save(p, optimize=True)
+    return p
+
+
 def _save(arr, name, q=90):
     im = Image.fromarray(np.clip(arr, 0, 255).astype("uint8"))
     im = im.resize((W, H), Image.LANCZOS)
@@ -150,6 +194,9 @@ def main():
     base = navy_paper()
     print(_save(base, "bg_navy.jpg"))
     print(_save(scene_wall(base), "bg_scene.jpg"))
+    print(_save(navy_paper(seed=31, strength=0.09, vignette=0.16), "bg_navy_sticker.jpg"))
+    print(_save(navy_paper(seed=32, color=RED, strength=0.075, vignette=0.14), "bg_red_sticker.jpg"))
+    print(torn_strip())
 
     rng = np.random.default_rng(5)
     # copertina: strappo che sale verso destra, come nella cover di riferimento
