@@ -223,7 +223,7 @@ def lib(series, name):
 
 def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), tape_at=(0.70, 0.22),
           tape_rot=-8, photo_w=800, show_logo=True, extra=None, cta=False, photo_dir="",
-          progress=None, head_top=168, head_max=104, progress_y=122):
+          progress=None, head_top=168, head_max=104, progress_y=122, sub_size=31):
     """
     Slide completa in stile ritaglio: carta, cerchi, logo, titolone, testo, foto a sticker,
     striscia strappata con fonte (o contatti se cta), nastro sulla foto.
@@ -236,8 +236,8 @@ def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), t
     if progress:
         out += checkboxes(sid, *progress, y=progress_y)
     t, hb, _ = headline(sid, head, head_top, size=fit_size(head, max_size=head_max))
-    lines = wrap(sub, 31) if isinstance(sub, str) else sub       # lista = righe spezzate a mano
-    s_svg, sb = subline(sid, lines, hb + 44) if sub else ("", hb)
+    lines = wrap(sub, sub_size) if isinstance(sub, str) else sub  # lista = righe spezzate a mano
+    s_svg, sb = subline(sid, lines, hb + 44, size=sub_size) if sub else ("", hb)
     out += group(t + s_svg, gid=f"{sid}-testi")
     box = None
     if photo:

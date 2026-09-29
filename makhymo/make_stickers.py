@@ -25,7 +25,7 @@ import sys
 
 import numpy as np
 from PIL import Image
-from scipy.ndimage import (binary_dilation, binary_fill_holes, binary_opening,
+from scipy.ndimage import (binary_dilation, binary_erosion, binary_fill_holes, binary_opening,
                            distance_transform_edt, gaussian_filter, label)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,9 @@ SHADOW = (10, 14, 16)    # ombra: dx, dy, sfocatura (px)
 # soggetti "pieni": tutto cio' che sta dentro il profilo e' soggetto, anche se verde
 # (es. uno schermo che mostra piante: senza questo il chroma key bucherebbe l'immagine a video)
 FILL_HOLES = {"08_schermo"}
+# soggetti con parti verdi anche sul bordo interno (es. la scheda di un disco rigido): tutto
+# l'interno della sagoma diventa pieno, con i colori originali; vale solo per quell'oggetto
+FILL_SOLID = {"09_disco_rigido"}
 
 
 def key_green(rgb, fill=False):
@@ -103,13 +106,23 @@ def sticker(src, dst, seed=0, fill=False):
     return _sticker_from(rgb, alpha, dst, rng)
 
 
+def solid_fill(rgb0, rgb, alpha):
+    """Interno della sagoma pieno e con i colori originali (niente chroma key dentro)."""
+    inside = binary_erosion(binary_fill_holes(alpha > 0.5), iterations=3)
+    return np.where(inside[..., None], rgb0, rgb), np.where(inside, 1.0, alpha)
+
+
 def sticker_grid(src, dsts, seed=0, fill=False):
     """Una sorgente con piu' oggetti -> un ritaglio per oggetto (dsts in ordine di lettura)."""
     im = Image.open(src).convert("RGB")
-    rgb, alpha = key_green(np.asarray(im).astype(float), fill)
+    rgb0 = np.asarray(im).astype(float)
+    rgb, alpha = key_green(rgb0, fill)
     out = []
     for j, (dst, m) in enumerate(zip(dsts, grid_split(alpha, len(dsts)))):
-        out.append(_sticker_from(rgb, alpha * m, dst, np.random.default_rng(seed * 10 + j)))
+        rgb_j, a_j = rgb, alpha * m
+        if os.path.splitext(os.path.basename(dst))[0] in FILL_SOLID:
+            rgb_j, a_j = solid_fill(rgb0, rgb, a_j)
+        out.append(_sticker_from(rgb_j, a_j, dst, np.random.default_rng(seed * 10 + j)))
     return out
 
 
