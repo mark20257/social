@@ -32,7 +32,8 @@ PH = "photos/postazione/cut"
 N = 7
 ALL34 = "Fonte: D.Lgs. 81/2008, Allegato XXXIV"
 
-story = partial(mky_sticker.story, photo_dir=PH)
+# caselle e testi scendono: piu' respiro sotto il logo
+story = partial(mky_sticker.story, photo_dir=PH, progress_y=182, head_top=254)
 slides = []
 
 # 00 · COVER --------------------------------------------------------------------
@@ -42,7 +43,7 @@ slides.append(story(
     "Spunta quelli che riconosci: dietro ognuno c’è una regola.",
     "00_checklist.png", "Checklist · postazione al videoterminale",
     ring=(900, 330), tape_at=(0.78, 0.16), tape_rot=8, photo_w=560, progress=(0, N),
-    head_top=184, head_max=84))
+    head_max=84))
 
 # 01 · SCHERMO -------------------------------------------------------------------
 slides.append(story(
@@ -51,7 +52,7 @@ slides.append(story(
     "Lo schermo è troppo basso o troppo alto. Il bordo superiore va tenuto poco sotto "
     "l’altezza degli occhi, a 50–70 cm da te.",
     "01_monitor_libri.png", ALL34, ring=(170, 380), tape_at=(0.80, 0.62), tape_rot=-8,
-    progress=(1, N), head_top=184))
+    progress=(1, N)))
 
 # 02 · DISTANZA ------------------------------------------------------------------
 slides.append(story(
@@ -60,7 +61,7 @@ slides.append(story(
     "Schermo troppo lontano o caratteri troppo piccoli. La scrivania deve essere profonda "
     "abbastanza da tenere lo schermo alla distanza giusta.",
     "02_metro.png", ALL34, ring=(900, 360), tape_at=(0.30, 0.10), tape_rot=-9, photo_w=900,
-    progress=(2, N), head_top=184))
+    progress=(2, N)))
 
 # 03 · LUCE ----------------------------------------------------------------------
 slides.append(story(
@@ -69,7 +70,7 @@ slides.append(story(
     "Riflessi e abbagliamenti affaticano la vista. La postazione va orientata rispetto a "
     "finestre e lampade, e le finestre devono avere tende regolabili.",
     "03_lampada.png", ALL34, ring=(180, 400), tape_at=(0.30, 0.55), tape_rot=8,
-    progress=(3, N), head_top=184))
+    progress=(3, N)))
 
 # 04 · SEDIA ---------------------------------------------------------------------
 slides.append(story(
@@ -78,7 +79,7 @@ slides.append(story(
     "La seduta deve regolarsi in altezza, indipendente dallo schienale. Se non basta, "
     "a chi lo chiede spetta un poggiapiedi.",
     "04_sedia.png", ALL34, ring=(880, 380), tape_at=(0.22, 0.30), tape_rot=-8,
-    progress=(4, N), head_top=184))
+    progress=(4, N)))
 
 # 05 · PORTATILE -----------------------------------------------------------------
 slides.append(story(
@@ -87,7 +88,7 @@ slides.append(story(
     "Per un uso prolungato servono tastiera e mouse esterni e un supporto che alzi lo schermo. "
     "Altrimenti si lavora curvi.",
     "05_portatile.png", ALL34, ring=(170, 380), tape_at=(0.76, 0.12), tape_rot=8, photo_w=780,
-    progress=(5, N), head_top=184))
+    progress=(5, N)))
 
 # 06 · SCRIVANIA -----------------------------------------------------------------
 slides.append(story(
@@ -96,7 +97,7 @@ slides.append(story(
     "Il piano deve bastare per schermo, tastiera e documenti, ed essere alto tra 70 e 80 cm. "
     "Se tutto si sovrappone, si perde tempo a spostare cose.",
     "06_pila_documenti.png", ALL34, ring=(900, 380), tape_at=(0.78, 0.30), tape_rot=-8,
-    progress=(6, N), head_top=184))
+    progress=(6, N)))
 
 # 07 · PAUSE ---------------------------------------------------------------------
 slides.append(story(
@@ -105,7 +106,7 @@ slides.append(story(
     "Chi usa il videoterminale almeno 20 ore a settimana ha diritto a 15 minuti di pausa "
     "ogni 120 di lavoro continuativo.",
     "07_sveglia.png", "Fonte: D.Lgs. 81/2008, artt. 173 e 175", ring=(180, 380),
-    tape_at=(0.80, 0.16), tape_rot=9, progress=(7, N), head_top=184))
+    tape_at=(0.80, 0.16), tape_rot=9, progress=(7, N)))
 
 # 08 · CTA -----------------------------------------------------------------------
 slides.append(story(
@@ -114,7 +115,7 @@ slides.append(story(
     "Anche una sola basta per rivedere la postazione. Scrivici: la guardiamo insieme, "
     "metro alla mano.",
     "08_spunta.png", ring=(880, 360), tape_at=(0.70, 0.66), tape_rot=-8, photo_w=720,
-    progress=(7, N), head_top=184, cta=True))
+    progress=(7, N), cta=True))
 
 
 if __name__ == "__main__":
