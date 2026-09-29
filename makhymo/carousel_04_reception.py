@@ -87,10 +87,10 @@ slides.append(story(
 slides.append(story(
     "slide-07", "navy", "OSPITI",
     ["L’OSPITE ARRIVA.", "==CHI LO ASPETTA==", "==LO SA SUBITO.=="],
-    "Un tablet sul bancone registra nome e azienda, stampa il badge e avvisa il collega. "
+    "Un tablet sul bancone registra nome e azienda e avvisa subito il collega. "
     "Nessuno resta in piedi mentre si cerca chi chiamare.",
-    "06_tablet_badge.png", "Accoglienza · registrazione ospiti",
-    ring=(900, 380), tape_at=(0.78, 0.18), tape_rot=8, photo_w=720))
+    "10_tablet.png", "Accoglienza · registrazione ospiti",
+    ring=(900, 380), tape_at=(0.86, 0.66), tape_rot=8, photo_w=720))
 
 # 08 · L'ATTESA ------------------------------------------------------------------
 slides.append(story(
@@ -103,11 +103,11 @@ slides.append(story(
 
 # 09 · LO SCHERMO IN ATTESA ------------------------------------------------------
 slides.append(story(
-    "slide-09", "navy", "DIGITAL SIGNAGE",
+    "slide-09", "navy", "SCHERMO A PARETE",
     ["MENTRE ASPETTA,", "==COSA GUARDA?=="],
     "Uno schermo in sala d’attesa racconta novità, progetti, prodotti. I contenuti si "
     "aggiornano dal computer, senza ristampare cartelli.",
-    "08_schermo.png", "Digital signage · sala d’attesa",
+    "08_schermo.png", "Sala d’attesa · schermo a parete",
     ring=(880, 360), tape_at=(0.70, 0.08), tape_rot=7, photo_w=900))
 
 # 10 · CTA -----------------------------------------------------------------------
