@@ -112,8 +112,9 @@ slides.append(story(
 slides.append(story(
     "slide-09", "navy", "PARLIAMONE",
     ["QUANTE CASELLE", "HAI ==SPUNTATO?=="],
-    "Anche una sola basta per rivedere la postazione. Scrivici: la guardiamo insieme, "
-    "metro alla mano.",
+    ["Anche una sola basta per rivedere la postazione.",
+     "Vieni nel nostro showroom di Asti, in Strada Valmanera 19:",
+     "la rivediamo insieme, metro alla mano."],
     "08_spunta.png", ring=(880, 360), tape_at=(0.70, 0.66), tape_rot=-8, photo_w=720,
     progress=(7, N), cta=True))
 

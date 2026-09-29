@@ -227,7 +227,8 @@ def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), t
     if progress:
         out += checkboxes(sid, *progress, y=progress_y)
     t, hb, _ = headline(sid, head, head_top, size=fit_size(head, max_size=head_max))
-    s_svg, sb = subline(sid, wrap(sub, 31), hb + 44) if sub else ("", hb)
+    lines = wrap(sub, 31) if isinstance(sub, str) else sub       # lista = righe spezzate a mano
+    s_svg, sb = subline(sid, lines, hb + 44) if sub else ("", hb)
     out += group(t + s_svg, gid=f"{sid}-testi")
     box = None
     if photo:
