@@ -25,7 +25,7 @@ Fatti e fonti (verificati il 29/09/2026):
   - Woodland entra in IBM nel 1951; il 3/04/1973 l'industria alimentare USA adotta come standard
     l'UPC progettato in IBM (George Laurer), con il contributo di Woodland. Fonte: IBM.
   - 26/06/1974, ore 8:01, supermercato Marsh di Troy (Ohio): primo prodotto scansionato,
-    un pacchetto di gomme da masticare, 67 centesimi di dollaro. Fonte: History.com.
+    un pacchetto di gomme da masticare, 67 Cent (0,67 dollari). Fonte: History.com.
   - Oltre 10 miliardi di scansioni al giorno. Fonte: GS1.
   Non usato: l'anno di vendita del brevetto a Philco (le fonti non concordano).
 """
@@ -160,7 +160,7 @@ slides.append(story(
     "slide-06", "red", "TROY, OHIO",
     ["26 GIUGNO 1974:", "==IL PRIMO «BIP»==", "IN CASSA."],
     "Alle 8:01 un pacchetto di gomme da masticare passa sotto uno scanner laser. Sul "
-    "registratore compare il prezzo: 67 centesimi di dollaro.",
+    "registratore compare il prezzo: 67 Cent.",
     "05_gomme.png", "Fonte: History.com, «June 26, 1974»", ring=(180, 420),
     tape_at=(0.36, 0.40), tape_rot=-14, photo_w=900))
 
