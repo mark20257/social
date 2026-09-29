@@ -85,10 +85,10 @@ slides.append(story(
 
 # 07 · GLI OSPITI ----------------------------------------------------------------
 slides.append(story(
-    "slide-07", "navy", "VISITATORI",
-    ["IL QUADERNO", "DELLE FIRME", "==LO LEGGONO TUTTI.=="],
-    "Nomi, aziende e orari di chi è passato prima restano aperti sul banco. Un tablet "
-    "registra l’ospite, stampa il badge e avvisa chi lo aspetta.",
+    "slide-07", "navy", "OSPITI",
+    ["L’OSPITE ARRIVA.", "==CHI LO ASPETTA==", "==LO SA SUBITO.=="],
+    "Un tablet sul bancone registra nome e azienda, stampa il badge e avvisa il collega. "
+    "Nessuno resta in piedi mentre si cerca chi chiamare.",
     "06_tablet_badge.png", "Accoglienza · registrazione ospiti",
     ring=(900, 380), tape_at=(0.78, 0.18), tape_rot=8, photo_w=720))
 
