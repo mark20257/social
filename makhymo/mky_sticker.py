@@ -212,6 +212,15 @@ def wrap(text, size, role="med", max_w=860):
     return lines
 
 
+def lib(series, name):
+    """Ritaglio gia' pronto di un'altra serie, da riusare senza generare nulla:
+    story(..., lib("postazione", "04_sedia"), ...). Catalogo: assets/photos/libreria.jpg."""
+    rel = f"photos/{series}/cut/{name}.png"
+    if not os.path.exists(os.path.join(ASSETS, rel)):
+        raise FileNotFoundError(rel)
+    return rel
+
+
 def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), tape_at=(0.70, 0.22),
           tape_rot=-8, photo_w=800, show_logo=True, extra=None, cta=False, photo_dir="",
           progress=None, head_top=168, head_max=104, progress_y=122):
@@ -233,7 +242,8 @@ def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), t
     box = None
     if photo:
         top = sb + 56
-        rel = f"{photo_dir}/{photo}" if photo_dir else photo
+        # "photos/..." = ritaglio preso dalla libreria di un'altra serie (vedi lib())
+        rel = f"{photo_dir}/{photo}" if photo_dir and not photo.startswith("photos/") else photo
         st, box = sticker(sid, rel, W / 2, 1262, photo_w, 1262 - top)
         out += st
     if extra:
