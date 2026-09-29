@@ -114,9 +114,9 @@ slides.append(story(
 
 # 09 · CTA -----------------------------------------------------------------------
 slides.append(story(
-    "slide-09", "navy", "PARLIAMONE",
-    ["HAI UNA STAMPANTE", "==A FINE VITA?=="],
-    ["Prima di buttarla, vediamo se si ripara.", "Scrivici nei commenti."],
+    "slide-09", "navy", "COMMENTA",
+    ["QUANTI ANNI HA", "==LA TUA STAMPANTE?=="],
+    ["Scrivilo nei commenti:", "vediamo chi ha la più longeva."],
     lib("artigrafiche", "00_multifunzione"), ring=(880, 360), tape_at=(0.78, 0.30), tape_rot=-8,
     photo_w=640, cta=True))
 
