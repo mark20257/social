@@ -14,7 +14,8 @@ import sys
 
 import numpy as np
 from PIL import Image
-from scipy.ndimage import binary_opening, distance_transform_edt, gaussian_filter, label
+from scipy.ndimage import (binary_fill_holes, binary_opening, distance_transform_edt,
+                           gaussian_filter, label)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MAX_SIDE = 1100          # lato massimo del soggetto (px) nella PNG finale
@@ -73,9 +74,11 @@ def sticker(src, dst, seed=0):
     a[pad:pad + h, pad:pad + w] = alpha
     lum = np.zeros((H, W))
     lum[pad:pad + h, pad:pad + w] = bw
-    # bordo bianco: dilatazione con la distanza dal soggetto
-    dist = distance_transform_edt(a < 0.5)
-    border = np.clip(BORDER + 0.5 - dist, 0, 1)
+    # bordo bianco solo attorno al profilo esterno: i vuoti interni (rete di una sedia,
+    # anse di un manico) restano trasparenti come nella foto
+    filled = binary_fill_holes(a > 0.5)
+    dist = distance_transform_edt(~filled)
+    border = np.clip(BORDER + 0.5 - dist, 0, 1) * (~filled)
     border = np.maximum(border, a)
     # ombra morbida del bordo
     sh = np.zeros((H, W))

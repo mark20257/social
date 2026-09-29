@@ -30,6 +30,9 @@ Fatti e fonti (verificati il 29/09/2026):
   Non usato: l'anno di vendita del brevetto a Philco (le fonti non concordano).
 """
 
+from functools import partial
+
+import mky_sticker
 from mky_sticker import *  # noqa: F401,F403
 from mky_svg import CW, _font_attrs, circle, contacts, logo, rect, slide, deliver, text_width
 
@@ -37,50 +40,7 @@ SLUG = "CodiceABarre"
 PH = "photos/barcode/cut"
 
 slides = []
-
-
-def wrap(text, size, role="med", max_w=860):
-    """A capo automatico con regola anti-orfano."""
-    words, lines, cur = text.split(), [], ""
-    for w in words:
-        t = (cur + " " + w).strip()
-        if cur and text_width(t, size, role) > max_w:
-            lines.append(cur)
-            cur = w
-        else:
-            cur = t
-    lines.append(cur)
-    if len(lines) > 1 and " " not in lines[-1]:
-        prev = lines[-2].rsplit(" ", 1)
-        if len(prev) == 2 and text_width(prev[1] + " " + lines[-1], size, role) <= max_w:
-            lines[-2], lines[-1] = prev[0], prev[1] + " " + lines[-1]
-    return lines
-
-
-def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), tape_at=(0.70, 0.22),
-          tape_rot=-8, photo_w=800, show_logo=True, extra=None, cta=False):
-    tone_col = NAVY if tone == "navy" else RED
-    out = paper(sid, tone) + rings(sid, *ring)
-    if show_logo:
-        out += logo(sid, W / 2, 62, 250)
-    t, hb, _ = headline(sid, head, 168)
-    s_svg, sb = subline(sid, wrap(sub, 31), hb + 44) if sub else ("", hb)
-    out += group(t + s_svg, gid=f"{sid}-testi")
-    box = None
-    if photo:
-        top = sb + 56
-        st, box = sticker(sid, f"{PH}/{photo}", W / 2, 1262, photo_w, 1262 - top)
-        out += st
-    if extra:
-        out += extra(sb)
-    out += torn_strip(sid)
-    out += contacts(sid, y=1298, color=CAPTION, size=24) if cta else caption(sid, cap)
-    if box and tape_txt:
-        x, y, w, h = box
-        tx = min(max(x + w * tape_at[0], 250), W - 250)
-        ty = y + h * tape_at[1]
-        out += tape(sid, tx, ty, tape_txt, tone_col, rotate=tape_rot)
-    return slide(sid, out)
+story = partial(mky_sticker.story, photo_dir=PH)
 
 
 # 01 · COVER --------------------------------------------------------------------
@@ -90,6 +50,7 @@ slides.append(story(
     "", "01_mano_etichetta.png", "Brevetto USA n. 2.612.994 · Woodland e Silver",
     ring=(900, 330), tape_at=(0.95, 0.32), tape_rot=-7,
     extra=lambda sb: barcode_label("slide-01", -60, 1010, 250, 110, rotate=14, seed=5)))
+
 
 def timeline(sid, top, rows, x_year=M, x_text=318, text_w=672, size=29, gap=44):
     """Linea del tempo: anno in kraft a sinistra, testo a destra, punti su una linea verticale."""

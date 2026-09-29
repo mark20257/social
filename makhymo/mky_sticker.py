@@ -15,8 +15,8 @@ import math
 import os
 from xml.sax.saxutils import escape
 
-from mky_svg import (ASSETS, FONT_WEIGHT, H, M, NAVY, RED, W, WHITE, _font_attrs, circle, group,
-                     path, rect, text_width)
+from mky_svg import (ASSETS, FONT_WEIGHT, H, M, NAVY, RED, W, WHITE, _font_attrs, circle, contacts,
+                     group, logo, path, rect, slide, stroke, text_width)
 
 ACCENT = "#F2CF9B"        # kraft chiaro: le parole chiave nei titoli
 TAPE = "#E6E0D3"
@@ -174,3 +174,74 @@ def barcode_label(sid, x, y, w, h, rotate=0, seed=3, name="etichetta"):
             + rect(0, 0, w, h, WHITE, rx=10) + bars)
     return group(body, gid=f"{sid}-{name}",
                  transform=f"translate({x:.1f} {y:.1f}) rotate({rotate} {w / 2:.1f} {h / 2:.1f})")
+
+
+def checkboxes(sid, n, total, y=122, size=28, gap=14):
+    """Caselle di spunta centrate: le prime n spuntate (kraft con segno navy), le altre vuote."""
+    tot_w = total * size + (total - 1) * gap
+    x = W / 2 - tot_w / 2
+    out = ""
+    for i in range(total):
+        bx = x + i * (size + gap)
+        if i < n:
+            out += rect(bx, y, size, size, ACCENT, rx=6)
+            out += path(f"M{bx + size * 0.24:.1f},{y + size * 0.52:.1f} L{bx + size * 0.43:.1f},"
+                        f"{y + size * 0.72:.1f} L{bx + size * 0.78:.1f},{y + size * 0.3:.1f}",
+                        "none", stroke(NAVY, 4))
+        else:
+            out += rect(bx + 1.5, y + 1.5, size - 3, size - 3, "none", rx=6,
+                        extra=f' stroke="{WHITE}" stroke-width="3" opacity="0.55"')
+    return group(out, gid=f"{sid}-caselle")
+
+
+def wrap(text, size, role="med", max_w=860):
+    """A capo automatico con regola anti-orfano."""
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        t = (cur + " " + w).strip()
+        if cur and text_width(t, size, role) > max_w:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = t
+    lines.append(cur)
+    if len(lines) > 1 and " " not in lines[-1]:
+        prev = lines[-2].rsplit(" ", 1)
+        if len(prev) == 2 and text_width(prev[1] + " " + lines[-1], size, role) <= max_w:
+            lines[-2], lines[-1] = prev[0], prev[1] + " " + lines[-1]
+    return lines
+
+
+def story(sid, tone, tape_txt, head, sub, photo=None, cap="", ring=(860, 300), tape_at=(0.70, 0.22),
+          tape_rot=-8, photo_w=800, show_logo=True, extra=None, cta=False, photo_dir="",
+          progress=None, head_top=168, head_max=104):
+    """
+    Slide completa in stile ritaglio: carta, cerchi, logo, titolone, testo, foto a sticker,
+    striscia strappata con fonte (o contatti se cta), nastro sulla foto.
+    progress=(n, totale) aggiunge le caselle di spunta sotto il logo.
+    """
+    tone_col = NAVY if tone == "navy" else RED
+    out = paper(sid, tone) + rings(sid, *ring)
+    if show_logo:
+        out += logo(sid, W / 2, 62, 250)
+    if progress:
+        out += checkboxes(sid, *progress)
+    t, hb, _ = headline(sid, head, head_top, size=fit_size(head, max_size=head_max))
+    s_svg, sb = subline(sid, wrap(sub, 31), hb + 44) if sub else ("", hb)
+    out += group(t + s_svg, gid=f"{sid}-testi")
+    box = None
+    if photo:
+        top = sb + 56
+        rel = f"{photo_dir}/{photo}" if photo_dir else photo
+        st, box = sticker(sid, rel, W / 2, 1262, photo_w, 1262 - top)
+        out += st
+    if extra:
+        out += extra(sb)
+    out += torn_strip(sid)
+    out += contacts(sid, y=1298, color=CAPTION, size=24) if cta else caption(sid, cap)
+    if box and tape_txt:
+        x, y, w, h = box
+        tx = min(max(x + w * tape_at[0], 250), W - 250)
+        ty = y + h * tape_at[1]
+        out += tape(sid, tx, ty, tape_txt, tone_col, rotate=tape_rot)
+    return slide(sid, out)
