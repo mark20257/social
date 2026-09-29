@@ -21,10 +21,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MAX_SIDE = 1100          # lato massimo del soggetto (px) nella PNG finale
 BORDER = 22              # spessore del bordo bianco (px, alla scala finale)
 SHADOW = (10, 14, 16)    # ombra: dx, dy, sfocatura (px)
+# soggetti "pieni": tutto cio' che sta dentro il profilo e' soggetto, anche se verde
+# (es. uno schermo che mostra piante: senza questo il chroma key bucherebbe l'immagine a video)
+FILL_HOLES = {"08_schermo"}
 
 
-def key_green(rgb):
-    """Alfa dal chroma key verde + rimozione dell'alone verde sui bordi."""
+def key_green(rgb, fill=False):
+    """Alfa dal chroma key verde + rimozione dell'alone verde sui bordi.
+    fill=True: i vuoti chiusi dentro il profilo restano pieni e con il loro colore."""
     r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
     greenness = g - np.maximum(r, b)
     alpha = np.clip((115 - greenness) / (115 - 45), 0, 1)
@@ -39,6 +43,10 @@ def key_green(rgb):
         solid = keep[lab]
     alpha = np.where(solid | (alpha < 0.5), alpha, 0) * (gaussian_filter(solid.astype(float), 1.5) > 0.02)
     g2 = np.minimum(g, np.maximum(r, b))                       # despill
+    if fill:
+        inside = binary_fill_holes(solid) & ~solid
+        alpha = np.where(inside, 1.0, alpha)
+        g2 = np.where(inside, g, g2)
     return np.dstack([r, g2, b]), alpha
 
 
@@ -52,11 +60,11 @@ def to_bw(rgb, rng):
     return np.clip(x, 0, 255)
 
 
-def sticker(src, dst, seed=0):
+def sticker(src, dst, seed=0, fill=False):
     rng = np.random.default_rng(seed)
     im = Image.open(src).convert("RGB")
     rgb = np.asarray(im).astype(float)
-    rgb, alpha = key_green(rgb)
+    rgb, alpha = key_green(rgb, fill)
     ys, xs = np.where(alpha > 0.05)
     y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
     rgb, alpha = rgb[y0:y1, x0:x1], alpha[y0:y1, x0:x1]
@@ -101,7 +109,8 @@ def main(series):
         if not f.lower().endswith((".jpg", ".png")):
             continue
         dst = os.path.join(cut_dir, os.path.splitext(f)[0] + ".png")
-        p, size, pad = sticker(os.path.join(src_dir, f), dst, seed=i)
+        fill = os.path.splitext(f)[0] in FILL_HOLES
+        p, size, pad = sticker(os.path.join(src_dir, f), dst, seed=i, fill=fill)
         print(p, size, f"{os.path.getsize(p) // 1024} KB")
 
 
